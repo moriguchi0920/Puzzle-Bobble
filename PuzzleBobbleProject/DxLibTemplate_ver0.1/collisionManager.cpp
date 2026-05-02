@@ -1,0 +1,355 @@
+#include"collisionManager.h"
+
+
+
+
+// コンストラクタ
+CollisionManager::CollisionManager()
+{
+	for (int i = 0; i < CollisionObject::CollisionMark::COLLISION_MARK_NUM; i++)
+	{
+		CollisionObject** pPObjectArray = collisionObjectTable[i];
+		for (int j = 0; j < OBJECT_MAX; j++)
+		{
+			pPObjectArray[j] = NULL;
+		}
+	}
+	for (int i = 0; i < COLLISION_SAVE_MAX; i++)
+	{
+		collisionInfoArray[i] = NULL;
+	}
+	lastId = COLLISION_GENERATE_START_ID;
+}
+// デストラクタ
+CollisionManager::~CollisionManager()
+{
+	nullAll();
+}
+
+// シングルトンのポインタ入手関数
+CollisionManager* CollisionManager::getInstance()
+{
+	static CollisionManager colManager;
+	return &colManager;
+}
+// マネージャーにCollisionObjectを登録
+void CollisionManager::addObject(CollisionObject* _Object)
+{
+	CollisionObject** pPObjectArray = collisionObjectTable[_Object->getMark()];
+	for (int j = 0; j < OBJECT_MAX; j++)
+	{
+		if (pPObjectArray[j] == NULL)
+		{
+			pPObjectArray[j] = _Object;
+			break;
+		}
+
+
+	}
+
+}
+
+
+// CollisionObjectの登録解除
+void CollisionManager::removeObject(CollisionObject* _pObject)
+{
+	if (_pObject == NULL)return ;
+	CollisionObject::CollisionMark mark = _pObject->getMark();
+	CollisionObject** pPObjectArray = collisionObjectTable[mark];
+	for (int i = 0; i < OBJECT_MAX; i++)
+	{
+		if (pPObjectArray[i] == _pObject)
+		{
+			//delete(pPObjectArray[i]);
+			removeInfoFromCol(_pObject);
+			pPObjectArray[i] = NULL;
+			break;
+		}
+
+	}
+}
+
+// CollisionOBjectの登録解除、CllisionInfoの破壊
+void CollisionManager::nullAll()
+{
+	for (int i = 0; i < CollisionObject::COLLISION_MARK_NUM; i++)
+	{
+		CollisionObject** pPObjectArray = collisionObjectTable[i];
+		for (int j = 0; j < OBJECT_MAX; j++)
+		{
+			pPObjectArray[j] = NULL;
+		}
+	}
+	for (int i = 0; i < COLLISION_SAVE_MAX; i++)
+	{
+		if (collisionInfoArray[i] != NULL)
+		{
+			delete(collisionInfoArray[i]);
+			collisionInfoArray[i] = NULL;
+		}
+	}
+}
+
+// 当たり判定関数
+void CollisionManager::flexibleCollision(CollisionObject* Ob1, CollisionObject* Ob2)
+{
+	// 接触情報保存用変数を宣言
+	ContactInfo contact;
+	// 当たっていないなら抜ける
+	if(!Ob1->getShape()->checkCollide(Ob2->getShape(), &contact)) return;
+	// すでにあるCollisionInfoと被っていても抜ける
+	if (knownReject(Ob1, Ob2)) return ;
+	// collisionInfoArrayの走査
+	for (int i = 0; i < COLLISION_SAVE_MAX; i++)
+	{
+		// NULLなら
+		CollisionInfo** ppElem = &collisionInfoArray[i];
+		CollisionInfo* pColInfo = *ppElem;
+		if (pColInfo == NULL)
+		{
+			// 分かりやすいように色を変更
+			Ob1->color.set(255, 255, 0);
+			Ob2->color.set(255, 255, 0);
+			// CollisionInfoの動的生成
+			*ppElem = new CollisionInfo(Ob1, Ob2);
+			(*ppElem)->setStatus(contact);
+			Ob1->setInfoIdx(i);
+			Ob2->setInfoIdx(i);
+			break;
+		}
+	}
+	return ;
+}
+/// <summary>
+///  当たり判定の更新関数
+/// </summary>
+void CollisionManager::collisionUpdate()
+{
+	updateInfo();
+	// まず当たり判定を取るオブジェクトを取る
+	for (int i = 0; i < CollisionObject::CollisionMark::COLLISION_MARK_NUM; i++)
+	{
+		CollisionObject** pPObjectArrayBase = collisionObjectTable[i];
+		for (int j = 0; j < OBJECT_MAX; j++)
+		{
+			CollisionObject* pCollisionBase = pPObjectArrayBase[j];
+			// NULLチェック
+			if (pCollisionBase == NULL)
+			{
+				continue;
+			}
+			if (pCollisionBase->getIsCollide() == false)
+			{
+				continue;
+			}
+
+	
+			
+			//// すでに接触したターゲットがいたら
+			//if (pCollisionBase->target != NULL && pCollisionBase->target->getShape() != NULL)
+			//{
+			//	// 接触判定(初回のみ)をオフに
+			//	pCollisionBase->collisionEnter = false;
+			//	// 継続接触判定を行う
+			//	if (flexibleCollision(pCollisionBase, pCollisionBase->target))
+			//	{
+			//		pCollisionBase->isCollideNow = true;
+			//		pCollisionBase->color.set(255, 255, 0);
+			//		break;
+			//	}
+			//	// ターゲットがいるが当たっていない場合は
+			//	else
+			//	{
+			//		// 継続判定もオフに
+			//		// ターゲットも初期化
+			//		pCollisionBase->isCollideNow = false;
+			//		pCollisionBase->target = NULL;
+			//		pCollisionBase->color.set(255, 255, 255);
+			//	}
+			//}
+			//// 接触したターゲットがいない場合も同じく初期化
+			//else
+			//{
+			//	pCollisionBase->isCollideNow = false;
+			//	pCollisionBase->target = NULL;
+			//	pCollisionBase->color.set(255, 255, 255);
+			//}
+			// その後、あたる相手を探す
+			for (int k = 0; k < CollisionObject::CollisionMark::COLLISION_MARK_NUM; k++)
+			{
+				CollisionObject** pPObjectArrayTarget = collisionObjectTable[k];
+				if (pCollisionBase->isCollideTarget(static_cast<CollisionObject::CollisionMark>(k)) == false)
+				{
+					continue;
+				}
+				for (int l = 0; l < OBJECT_MAX; l++)
+				{
+					CollisionObject* pCollisionTarget = pPObjectArrayTarget[l];
+					// NULLチェック
+					if (pCollisionTarget == NULL || pCollisionBase == pCollisionTarget)
+					{
+						continue;
+					}
+					if (pCollisionTarget->getIsCollide() == false)
+					{
+						continue;
+					}
+					if (pCollisionBase->getShape() == NULL || pCollisionTarget->getShape() == NULL)
+					{
+						continue;
+					}
+					// 当たり判定を取る
+					flexibleCollision(pCollisionBase, pCollisionTarget);
+
+					
+					//else
+					//{
+					//	pCollisionBase->target = pCollisionTarget;
+					//	pCollisionBase->isCollideNow = false;
+					//	pCollisionTarget->isCollideNow = false;
+					//	pCollisionBase->color.set(255, 255, 255);
+					//	pCollisionTarget->color.set(255, 255, 255);
+					//	break;
+
+					//}
+
+				}
+			}
+
+
+		}
+
+	}
+
+
+}
+
+// 
+void CollisionManager::removeInfoFromCol(CollisionObject* pCol)
+{
+	for (int i = 0; i < COLLISION_SAVE_MAX; i++)
+	{
+		CollisionInfo* pColInfo = collisionInfoArray[i];
+		if (pColInfo != NULL)
+		{
+			pColInfo->removeCol(pCol);
+		}
+	}
+
+}
+
+// 当たり判定情報の更新
+void CollisionManager::updateInfo()
+{
+	// collisionInfoArrayの走査
+	for (int i = 0; i < COLLISION_SAVE_MAX; i++)
+	{
+		// NULLじゃなかったら
+		CollisionInfo** ppElem = &collisionInfoArray[i];
+		CollisionInfo* pColInfo = *ppElem;
+		if (pColInfo != NULL)
+		{
+			// getColPtr1()が消去済みの場合
+			if (pColInfo->getColPtr1() == NULL || pColInfo->getColPtr1()->getShape() == NULL)
+			{
+				// getColPtr2()が残っていた場合
+				if (pColInfo->getColPtr2() != NULL)
+				{
+					// 色変更
+					pColInfo->getColPtr2()->color.set(255, 255, 255);
+					// インデックスの登録を解除
+					pColInfo->getColPtr2()->removeInfoIdx(i);
+				}
+				// 破壊と登録解除
+				delete pColInfo;
+				*ppElem = NULL;
+				//deleteInfoFromIdx(i);
+				continue;
+			}
+			// getColPtr2()が消去済みの場合
+			if (pColInfo->getColPtr2() == NULL || pColInfo->getColPtr2()->getShape() == NULL)
+			{
+				if (pColInfo->getColPtr1() != NULL)
+				{
+					pColInfo->getColPtr1()->color.set(255, 255, 255);
+					pColInfo->getColPtr1()->removeInfoIdx(i);
+
+				}
+				delete pColInfo;
+				*ppElem = NULL;
+				/*deleteInfoFromIdx(i);*/
+				continue;
+			}
+			// 接触点の更新のために宣言
+			ContactInfo contact;
+			// 継続して当たっていたら
+			if (pColInfo->getColPtr1()->getShape()->checkCollide(pColInfo->getColPtr2()->getShape(), &contact))
+			{
+				// 色変更
+				pColInfo->getColPtr1()->color.set(255, 0, 0);
+				pColInfo->getColPtr2()->color.set(255, 0, 0);
+				// 継続判定はtrueのまま
+				// 初回接触はfalseに
+				pColInfo->secondCollision();
+				// その他接触点などの設定
+				
+
+			}
+			// 当たっていない場合
+			else
+			{
+				// 色変更と削除
+				pColInfo->getColPtr1()->color.set(255, 255, 255);
+				pColInfo->getColPtr2()->color.set(255, 255, 255);
+				deleteInfoFromIdx(i);
+			}
+		}
+	}
+}
+
+// インデックスから検索して削除する関数
+void CollisionManager::deleteInfoFromIdx(int idx)
+{
+	collisionInfoArray[idx]->getColPtr1()->removeInfoIdx(idx);
+	collisionInfoArray[idx]->getColPtr2()->removeInfoIdx(idx);
+	delete(collisionInfoArray[idx]);
+	collisionInfoArray[idx] = NULL;
+}
+
+// すでに接触情報が保存されている場合に弾く間数
+bool CollisionManager::knownReject(CollisionObject* Ob1, CollisionObject* Ob2)
+{
+	for (int i = 0; i < COLLISION_SAVE_MAX; i++)
+	{
+		CollisionInfo* pColInfo = collisionInfoArray[i];
+		if (pColInfo != NULL)
+		{
+			if (pColInfo->getColPtr1() == Ob1 && collisionInfoArray[i]->getColPtr2() == Ob2)
+			{
+				return true;
+			}
+			if (pColInfo->getColPtr2() == Ob1 && collisionInfoArray[i]->getColPtr1() == Ob2)
+			{
+				return true;
+			}
+
+		}
+	}
+	return false;
+}
+
+// 全削除の関数
+void CollisionManager::deleteAllInfo()
+{
+	for (int i = 0; i < COLLISION_SAVE_MAX; i++)
+	{
+		delete(collisionInfoArray[i]);
+		collisionInfoArray[i] = NULL;
+	}
+}
+
+// オブジェクトのメンバpColに持たせたインデックスからCollisionInfoを取り出す関数
+CollisionInfo* CollisionManager::getColInfoFromIdx(int idx)
+{
+	return collisionInfoArray[idx];
+}
