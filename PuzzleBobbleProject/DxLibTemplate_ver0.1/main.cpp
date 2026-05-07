@@ -1,6 +1,7 @@
 #include "dxlib.h"
 #include "const.h"
 #include "keyManager.h"
+#include"Stage.h"
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -19,7 +20,24 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	initKeyManager();
 	// ↑ システム初期化 ↑
 	//---------------------------------------
+	std::vector<int> buffer[13] =
+	{
+		{1, 2, 3, 4, 5, 6, 1, 2},
+		{6, 5, 4, 3, 2, 1, 6, 0 },
+		{6, 0, 4, 3, 3, 4, 1, 1},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0}
+	};
 
+	Stage stage(buffer);
 
 
 	while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0)
@@ -31,7 +49,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		// ↑ システム更新 ↑
 		//---------------------------------------
 
-
+		TaskManager::getInstance()->taskUpdateAll();
 
 		//---------------------------------------
 		// 描画
@@ -41,7 +59,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		// ↑ 画面消去 ↑
 		//---------------------------------------
 
-
+		RenderableManager::getInstance()->renderAll();
 
 		ScreenFlip();
 	}

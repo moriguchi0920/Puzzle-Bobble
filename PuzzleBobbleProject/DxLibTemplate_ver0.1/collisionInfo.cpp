@@ -32,6 +32,7 @@ CollisionObject* CollisionInfo::getTarget(CollisionObject* pBase)
 
 CollisionObject* CollisionInfo::getColPtr1()
 {
+
 	return pCol1;
 }
 CollisionObject* CollisionInfo::getColPtr2()
@@ -52,12 +53,12 @@ void CollisionInfo::removeCol(CollisionObject* pCol)
 {
 	if (this->getColPtr1() == pCol)
 	{
-		pCol1 = NULL;
+		pCol1 = nullptr;
 
 	}
 	if (this->getColPtr2() == pCol)
 	{
-		pCol2 = NULL;
+		pCol2 = nullptr;
 	}
 }
 

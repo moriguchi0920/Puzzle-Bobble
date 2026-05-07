@@ -53,9 +53,21 @@ void RenderableAnimation::render()
 
 }
 
+RenderableRect::RenderableRect()
+{
+	priority = PRIORITY_DEFAULT;
+}
+
 RenderableRect::RenderableRect(float _priority, Float2 _leftTop, Float2 _size) : Renderable(_priority), rect(_leftTop, _size)
 {
 }
+
+void RenderableRect::set(Float2 _leftTop, Float2 _size)
+{
+	rect.begin = _leftTop;
+	rect.size = _size;
+}
+
 
 void RenderableRect::render()
 {
@@ -64,13 +76,47 @@ void RenderableRect::render()
 
 RenderableCircle::RenderableCircle()
 {
-	
+	priority = PRIORITY_DEFAULT;
 }
 
 RenderableCircle::RenderableCircle(float _priority, Float2 _pos, float _radius) : Renderable(_priority), circle(_pos, _radius)
 {
 }
 
+void RenderableCircle::set(Float2 _pos, float _radius)
+{
+	circle.pos = _pos;
+	circle.radius = _radius;
+
+}
+
 void RenderableCircle::render()
 {
+	DrawCircle(circle.pos.x, circle.pos.y, circle.radius, 0x000000, true);
+
+}
+
+RenderableLine::RenderableLine()
+{
+	priority = PRIORITY_DEFAULT;
+}
+
+RenderableLine::RenderableLine(float _priority, Float2 _begin, Float2 _end): Renderable(_priority), line(_begin, _end)
+{
+}
+
+
+
+
+void RenderableLine::set(Float2 _begin, Float2 _end)
+{
+	line.begin = _begin;
+	line.end = _end;
+}
+
+
+
+void RenderableLine::render()
+{
+	DrawLine(line.begin.x, line.begin.y, line.end.x, line.end.y, 0x000000, 1);
 }

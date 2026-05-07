@@ -9,7 +9,7 @@ class CollisionObject
 
 protected:
 	// 形オブジェクトのポインタ
-	CollisionShape* pShape;
+	std::unique_ptr<CollisionShape> pShape;
 
 	// CollisionInfo検索用の配列インデックス
 	int colInfoIdx[INFO_INDEX_MAX];
@@ -22,13 +22,9 @@ protected:
 		enum CollisionMark
 		{
 			DEFAULT = -1,
-			ALLY,
-			ENEMY,
-			PLATE,
-			LAZER,
-			BULLET,
-			ENEMYLAZER,
 			WALL,
+			CEILING,
+			BUBBLE,
 			COLLISION_MARK_NUM
 		};
 		
@@ -52,65 +48,25 @@ public:
 		DebugColor color;
 };
 
-// 味方側当たり判定
-class CAlly: public CollisionObject
-{
-	public: 
-
-		virtual CollisionMark getMark();
-		virtual bool isCollideTarget(CollisionMark mark);
-};
-
-// 反射板当たり判定
-class CPlate : public CollisionObject
-{
-	public: 
-		virtual CollisionMark getMark();
-		virtual bool isCollideTarget(CollisionMark mark);
-
-};
-
-// 敵当たり判定
-class CEnemy : public CollisionObject
-{
-	public:
-		virtual CollisionMark getMark();
-		virtual bool isCollideTarget(CollisionMark mark);
-
-
-};
-
-// 上下の壁当たり判定
 class CWall : public CollisionObject
 {
-	public:
-		virtual CollisionMark getMark();
-		virtual bool isCollideTarget(CollisionMark mark);
+public:
+	virtual CollisionMark getMark() override;
+	virtual bool isCollideTarget(CollisionMark mark) override;
 };
 
-// レーザー当たり判定
-class CLazer :public CollisionObject
-{
-	public:
-		virtual CollisionMark getMark();
-		virtual bool isCollideTarget(CollisionMark mark);
-
-};
-
-class CBullet : public CollisionObject
+class CCeiling : public CollisionObject
 {
 public:
-	virtual CollisionMark getMark();
-	virtual bool isCollideTarget(CollisionMark mark);
+	virtual CollisionMark getMark() override;
+	virtual bool isCollideTarget(CollisionMark mark) override;
 };
 
-// 敵レーザー当たり判定
-class CEnemyLazer :public CollisionObject
+class CBubble : public CollisionObject
 {
 public:
-	virtual CollisionMark getMark();
-	virtual bool isCollideTarget(CollisionMark mark);
-
+	virtual CollisionMark getMark() override;
+	virtual bool isCollideTarget(CollisionMark mark) override;
 };
 
 

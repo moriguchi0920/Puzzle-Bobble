@@ -173,8 +173,12 @@
     <ClCompile Include="Rect.cpp" />
     <ClCompile Include="renderable.cpp" />
     <ClCompile Include="renderableManager.cpp" />
-    <ClCompile Include="scene.cpp" />
-    <ClCompile Include="sceneManager.cpp" />
+    <ClCompile Include="scene.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="sceneManager.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="soundManager.cpp" />
     <ClCompile Include="Stage.cpp" />
     <ClCompile Include="task.cpp" />
@@ -202,8 +206,12 @@
     <ClInclude Include="Rect.h" />
     <ClInclude Include="renderable.h" />
     <ClInclude Include="renderableManager.h" />
-    <ClInclude Include="scene.h" />
-    <ClInclude Include="sceneManager.h" />
+    <ClInclude Include="scene.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="sceneManager.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="soundManager.h" />
     <ClInclude Include="Stage.h" />
     <ClInclude Include="task.h" />

@@ -1,85 +1,60 @@
 #include"taskManager.h"
 
 
-
-TaskManager::TaskManager()
+// コンストラクタの初期化リストでタスクのvectorの要素数を指定
+TaskManager::TaskManager() : pTaskArray(ALL_OBJECT_MAX)
 {
-	for (int i = 0; i < ALL_OBJECT_MAX; i++)
-	{
-		pTaskArray[i] = NULL;
-	}
-	taskNum = 0;
+
+	// 現在のIDを初期化
 	lastId = TASK_GENERATE_START_ID;
 }
 
 TaskManager::~TaskManager()
 {
-	for (int i = 0; i < ALL_OBJECT_MAX; i++)
-	{
-		Task** ppElem = &pTaskArray[i];
-		Task* pTask = *ppElem;
-		if (pTask == NULL)
-		{
-			continue;
-		}
-		delete pTask;
-		*ppElem = NULL;
-	}
+	pTaskArray.clear();
 }
 
 Task* TaskManager::search(int id)
 {
-	Task* ret = NULL;
+	// とりあえずnullptrでTask*変数を定義
+	Task* ret = nullptr;
 
-	for (int i = 0; i < ALL_OBJECT_MAX; i++)
+	// 範囲forでpTaskArrayを見て回る
+	for (std::unique_ptr<Task>& upTask : pTaskArray)
 	{
-		Task* pTask = pTaskArray[i];
-		if (pTask == NULL)
+		// 中身がnullptr(つまりポインタが入っていない)なら
+		if (!upTask)
 		{
+			// 戻る
 			continue;
 		}
-		if (pTaskArray[i]->getTaskId() == id)
+		// IDが一致するTaskが見つかったら
+		if (upTask->getTaskId() == id)
 		{
-			ret = pTask;
+			// retに生ポインタをget()を通して入れる
+			ret = upTask.get();
 			break;
 		}
 	}
+	// 結果をreturn 
 	return ret;
 }
 
 
-bool TaskManager::addObject(Task* _Object)
+bool TaskManager::addObject(std::unique_ptr<Task> _Object)
 {
-	// すでに配列がいっぱいだったら登録をしない
-	if (ALL_OBJECT_MAX <= taskNum)
-	{
-		return false;
-	}
+
 
 	// 同じIDのタスクが存在しないかチェック
 
-	if (search(_Object->getTaskId()) != NULL)
+	if (search(_Object->getTaskId()))
 	{
 		return false;
 	}
 
-	Task** ppElem = NULL;
-	for (int i = 0; i < ALL_OBJECT_MAX; i++)
-	{
-		Task** ppCurElem = &pTaskArray[i];
-		if (*ppCurElem == NULL)
-		{
-			ppElem = ppCurElem;
-			break;
-		}
+	// vectorへの追加(unique_ptrの所有権の移譲でもあるのでmove()を使う)
+	pTaskArray.push_back(std::move(_Object));
 
-	}
-	if (ppElem == NULL)
-	{
-		return false;
-	}
-	*ppElem = _Object;
-	taskNum++;
 
 	return true;
 
@@ -89,12 +64,18 @@ bool TaskManager::addObject(Task* _Object)
 void TaskManager::removeObject(Task* _pObject)
 {
 
-	for (int i = 0; i < ALL_OBJECT_MAX; i++)
+	// for文で走査(vectorの.size()はintでは不適なためsize_t)
+	for (size_t i = 0; i < pTaskArray.size(); i++)
 	{
-		if (pTaskArray[i] == _pObject)
+		// vector要素の参照を取る
+		std::unique_ptr<Task>& upTask = pTaskArray[i];
+
+		// .get()で出した生ポインタと引数が一致したら
+		if (upTask.get() == _pObject)
 		{
-			delete(pTaskArray[i]);
-			pTaskArray[i] = NULL;
+			// vectorの.erase()で初期インデックス(.begin())にi(現在見ているインデックス)を足したインデックスの要素を削除
+			pTaskArray.erase(pTaskArray.begin() + i);
+			
 			break;
 		}
 
@@ -105,62 +86,57 @@ void TaskManager::removeObject(Task* _pObject)
 
 void TaskManager::taskUpdateAll()
 {
-	for (int i = 0; i < ALL_OBJECT_MAX; i++)
+	for (std::unique_ptr<Task>& upTask : pTaskArray)
 	{
-		// 現在参照している要素のポインタ
-		Task** ppElem = &pTaskArray[i];
-		// そのポインタに入っているタスクのポインタ
-		Task* pTask = *ppElem;
+
+
 		// NULLだったら
-		if (pTask == NULL)
+		if (!upTask)
 		{
 			// これ以上何もせず次の要素に
 			continue;
 		}
 
 		
-		int curState = pTask->getTaskState();
+		int curState = upTask->getTaskState();
 
 		// タスクが死亡状態か
 		if (curState == Task::INACTIVE)
 		{
 			// 削除
-			delete pTask;
-			// NULLを設定
-			*ppElem = NULL;
-			// タスクの登録数をカウントダウン
-			taskNum--;
+			upTask.reset(nullptr);
+
 			// 次の要素へ
 			continue;
 		}
 		if (curState == Task::READY)
 		{
-			pTask->activate();
+			upTask->activate();
 		}
-		pTask->Update();
+		upTask->Update();
 
 	}
 }
-void TaskManager::taskRenderAll()
-{
-	for (int i = 0; i < ALL_OBJECT_MAX; i++)
-	{
-		Task* pTask = pTaskArray[i];
-		if (pTask == NULL)
-		{
-			continue;
-		}
-
-		int state = pTask->getTaskState();
-
-		if (!(state == Task::ACTIVE))
-		{
-			continue;
-		}
-		pTask->Render();
-	}
-
-}
+//void TaskManager::taskRenderAll()
+//{
+//	for (int i = 0; i < ALL_OBJECT_MAX; i++)
+//	{
+//		Task* pTask = pTaskArray[i];
+//		if (pTask == NULL)
+//		{
+//			continue;
+//		}
+//
+//		int state = pTask->getTaskState();
+//
+//		if (!(state == Task::ACTIVE))
+//		{
+//			continue;
+//		}
+//		pTask->Render();
+//	}
+//
+//}
 
 //void TaskManager::destroyUpdate()
 //{
@@ -180,14 +156,7 @@ void TaskManager::taskRenderAll()
 
 void TaskManager::destroyAll()
 {
-	for (int i = 0; i < ALL_OBJECT_MAX; i++)
-	{
-		if (pTaskArray[i] != NULL)
-		{
-			delete(pTaskArray[i]);
-			pTaskArray[i] = NULL;
-		}
-	}
+	pTaskArray.clear();
 
 }
 

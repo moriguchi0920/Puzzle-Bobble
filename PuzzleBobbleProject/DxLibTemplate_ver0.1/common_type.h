@@ -10,6 +10,7 @@
 #include"Circle.h"
 #include<cmath>
 #include<vector>
+#include<memory>
 #include<stdlib.h>
 
 class ShapeSetParam;

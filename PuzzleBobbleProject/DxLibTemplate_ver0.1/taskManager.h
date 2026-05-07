@@ -1,7 +1,9 @@
 #pragma once
 #include"task.h"
 #include"collisionManager.h"
-// タスクの配列を保持し、全てのオブジェクトの更新、描画、破壊を行うクラス
+#include<vector>
+#include<memory>
+// タスクの配列を保持し、全てのオブジェクトの更新、破壊を行うクラス
 
 class TaskManager
 {
@@ -15,8 +17,8 @@ public:
 		return &instance;
 	}
 private :
-	Task* pTaskArray[ALL_OBJECT_MAX];
-	int taskNum;
+	//Task* pTaskArray[ALL_OBJECT_MAX];
+	std::vector<std::unique_ptr<Task>> pTaskArray;
 	int lastId;
 
 private :
@@ -30,7 +32,7 @@ public:
 	virtual ~TaskManager();
 
 	Task* search(int id);
-	bool addObject(Task* _Object);
+	bool addObject(std::unique_ptr<Task> _Object);
 	void removeObject(Task* _pObject);
 	void taskUpdateAll();
 	void taskRenderAll();

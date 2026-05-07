@@ -25,7 +25,7 @@ private :
 
 private:
 	// 登録可能数
-	static const int RENDERABLE_ARRAY_LENGTH = 32;
+	static const int RENDERABLE_ARRAY_LENGTH = 3200;
 
 	// Renderableクラスオブジェクトのポインタ配列
 	Renderable* pRenderableArray[RENDERABLE_ARRAY_LENGTH];

@@ -3,7 +3,6 @@
 // コンストラクタ
 CollisionObject::CollisionObject()
 {
-	pShape = NULL;
 	damage = 1;
 	for (int i = 0; i < INFO_INDEX_MAX; i++)
 	{
@@ -14,8 +13,7 @@ CollisionObject::CollisionObject()
 // デストラクタ
 CollisionObject::~CollisionObject()
 {
-	delete(pShape);
-	pShape = NULL;
+
 
 }
 
@@ -48,12 +46,12 @@ int CollisionObject::getInfoIdx(int i)
 }
 void CollisionObject::setShape(CollisionShape* _pShape)
 {
-	pShape = _pShape;
+	pShape.reset(_pShape);
 }
 
 CollisionShape* CollisionObject::getShape()
 {
-	return pShape;
+	return pShape.get();
 }
 
 void CollisionObject::setIsCollide(bool _isCollide)
@@ -77,117 +75,55 @@ int CollisionObject::getDamage()
 	return damage;
 }
 
- 
-CollisionObject::CollisionMark CAlly::getMark()
-{
-	return ALLY;
-}
-bool CAlly::isCollideTarget(CollisionMark mark)
-{
-	if (mark == CollisionObject::CollisionMark::ALLY
-		|| mark == CollisionObject::CollisionMark::PLATE
-		|| mark == CollisionObject::CollisionMark::LAZER
-		|| mark == CollisionObject::CollisionMark::BULLET
-		)
-	{
-		return false;
-	}
-	return true;
-}
-
-CollisionObject::CollisionMark CPlate::getMark()
-{
-	return PLATE;
-}
-bool CPlate::isCollideTarget(CollisionMark mark)
-{
-	if (mark == CollisionObject::CollisionMark::ALLY
-		|| mark == CollisionObject::CollisionMark::PLATE
-		|| mark == CollisionObject::CollisionMark::WALL
-		)
-	{
-		return false;
-	}
-	return true;
-}
-CollisionObject::CollisionMark CEnemy::getMark()
-{
-	return ENEMY;
-}
-bool CEnemy::isCollideTarget(CollisionMark mark)
-{
-	if (mark == CollisionObject::CollisionMark::ENEMY
-		|| mark == CollisionObject::CollisionMark::WALL
-		|| mark == CollisionObject::CollisionMark::ENEMYLAZER
-		)
-	{
-		return false;
-	}
-	return true;
-}
-
 CollisionObject::CollisionMark CWall::getMark()
 {
-	return WALL;
+	return CollisionMark::WALL;
 }
+
 bool CWall::isCollideTarget(CollisionMark mark)
 {
-	if (mark == CollisionObject::CollisionMark::ENEMY
-		|| mark == CollisionObject::CollisionMark::PLATE
-		|| mark == CollisionObject::CollisionMark::WALL
-		)
+	bool ret = false;
+
+	if (mark == CollisionMark::BUBBLE)
 	{
-		return false;
+		ret = true;
 	}
-	return true;
+
+	return ret;
 }
 
-CollisionObject::CollisionMark CLazer::getMark()
+CollisionObject::CollisionMark CCeiling::getMark()
 {
-	return LAZER;
+	return CollisionMark::CEILING;
 }
-bool CLazer::isCollideTarget(CollisionMark mark)
+
+bool CCeiling::isCollideTarget(CollisionMark mark)
 {
-	if (mark == CollisionObject::CollisionMark::ALLY
-		|| mark == CollisionObject::CollisionMark::ENEMYLAZER
-		|| mark == CollisionObject::CollisionMark::LAZER
-		|| mark == CollisionObject::CollisionMark::BULLET
-		)
+	bool ret = false;
+
+	if (mark == CollisionMark::BUBBLE)
 	{
-		return false;
+		ret = true;
 	}
-	return true;
+
+	return ret;
+
 }
 
-CollisionObject::CollisionMark CBullet::getMark()
+CollisionObject::CollisionMark CBubble::getMark()
 {
-	return BULLET;
+	return CollisionMark::BUBBLE;
 }
-bool CBullet::isCollideTarget(CollisionMark mark)
+
+bool CBubble::isCollideTarget(CollisionMark mark)
 {
-	if (mark == CollisionObject::CollisionMark::BULLET || 
-		mark == CollisionObject::CollisionMark::ALLY ||
-		mark == CollisionObject::CollisionMark::LAZER)
+	bool ret = false;
+
+	if (mark == CollisionMark::BUBBLE || mark == CollisionMark::WALL || mark == CollisionMark::CEILING)
 	{
-		return false;
+		ret = true;
 	}
-	return true;
-}
 
+	return ret;
 
-CollisionObject::CollisionMark CEnemyLazer::getMark()
-{
-	return ENEMYLAZER;
-}
-bool CEnemyLazer::isCollideTarget(CollisionMark mark)
-{
-	if (mark == CollisionObject::CollisionMark::ENEMY
-		|| mark == CollisionObject::CollisionMark::ENEMYLAZER
-		|| mark == CollisionObject::CollisionMark::LAZER
-
-		)
-	{
-		return false;
-	}
-	return true;
 }

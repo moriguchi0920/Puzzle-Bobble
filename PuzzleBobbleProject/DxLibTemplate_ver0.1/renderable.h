@@ -53,7 +53,9 @@ class RenderableLine : public Renderable
 protected:
 	Line line;
 public:
+	RenderableLine();
 	RenderableLine(float _priority, Float2 _begin, Float2 _end);
+	void set(Float2 _begin, Float2 _end);
 	virtual void render() override;
 
 };
@@ -66,6 +68,7 @@ protected:
 public:
 	RenderableRect();
 	RenderableRect(float _priority, Float2 _leftTop, Float2 _size);
+	void set(Float2 _leftTop, Float2 _size);
 	virtual void render() override;
 
 };
@@ -78,6 +81,7 @@ protected:
 public:
 	RenderableCircle();
 	RenderableCircle(float _priority, Float2 _pos, float _radius);
+	void set(Float2 _pos, float _radius);
 	virtual void render() override;
 
 };
@@ -90,6 +94,7 @@ protected:
 	int imageHandle;
 public :
 	RenderableImage(float _priority, int _imageHandle);
+	void set();
 	virtual void render() override;
 };
 

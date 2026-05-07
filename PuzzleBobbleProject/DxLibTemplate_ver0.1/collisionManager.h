@@ -13,21 +13,13 @@ private:
 	static const int COLLISION_GENERATE_START_ID = 32;
 
 private:
-	//Ally* pAlly[OBJECT_MAX];
-	//Plate* pPlate[OBJECT_MAX];
-	//Enemy* pEnemy[OBJECT_MAX];
-	//Wall* pWall[OBJECT_MAX];
 	
 
 	// 当たり判定をとる全オブジェクトの二次元配列(種類ごとにオブジェクト最大数分用意)
-	CollisionObject* collisionObjectTable[CollisionObject::CollisionMark::COLLISION_MARK_NUM][OBJECT_MAX];
-	//collisionObjectTable[ALLY=0]
-	//collisionObjectTable[PLATE=1]
-	//collisionObjectTable[ENEMY=2]
-	//collisionObjectTable[WALL=3]
+	std::vector<CollisionObject*> collisionObjectTable[CollisionObject::CollisionMark::COLLISION_MARK_NUM];
 
 	// 接触情報保存配列
-	CollisionInfo* collisionInfoArray[COLLISION_SAVE_MAX];
+	std::vector<std::unique_ptr<CollisionInfo>> collisionInfoArray;
 
 	int lastId;
 
