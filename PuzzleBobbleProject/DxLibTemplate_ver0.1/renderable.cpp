@@ -68,10 +68,19 @@ void RenderableRect::set(Float2 _leftTop, Float2 _size)
 	rect.size = _size;
 }
 
+void RenderableRect::setColor(int r, int g, int b, int a)
+{
+	color.set(r, g, b, a);
+}
+
+DebugColor& RenderableRect::getColor()
+{
+	return color;
+}
 
 void RenderableRect::render()
 {
-	DrawBox(rect.begin.x, rect.begin.y, rect.begin.x + rect.size.x, rect.begin.y + rect.size.y, 0x000000, true);
+	DrawBox(rect.begin.x, rect.begin.y, rect.begin.x + rect.size.x, rect.begin.y + rect.size.y, GetColor(color.r, color.g, color.b), true);
 }
 
 RenderableCircle::RenderableCircle()
@@ -90,9 +99,20 @@ void RenderableCircle::set(Float2 _pos, float _radius)
 
 }
 
+void RenderableCircle::setColor(int r, int g, int b, int a)
+{
+	color.set(r, g, b, a);
+}
+
+
+DebugColor& RenderableCircle::getColor()
+{
+	return color;
+}
+
 void RenderableCircle::render()
 {
-	DrawCircle(circle.pos.x, circle.pos.y, circle.radius, 0x000000, true);
+	DrawCircle(circle.pos.x, circle.pos.y, circle.radius, GetColor(color.r, color.g, color.b), true);
 
 }
 
@@ -114,9 +134,18 @@ void RenderableLine::set(Float2 _begin, Float2 _end)
 	line.end = _end;
 }
 
+void RenderableLine::setColor(int r, int g, int b, int a)
+{
+	color.set(r, g, b, a);
+}
 
+
+DebugColor& RenderableLine::getColor()
+{
+	return color;
+}
 
 void RenderableLine::render()
 {
-	DrawLine(line.begin.x, line.begin.y, line.end.x, line.end.y, 0x000000, 1);
+	DrawLine(line.begin.x, line.begin.y, line.end.x, line.end.y, GetColor(color.r, color.g, color.b), 1);
 }

@@ -20,19 +20,19 @@ Task* TaskManager::search(int id)
 	Task* ret = nullptr;
 
 	// 範囲forでpTaskArrayを見て回る
-	for (std::unique_ptr<Task>& upTask : pTaskArray)
+	for (std::shared_ptr<Task>& spTask : pTaskArray)
 	{
 		// 中身がnullptr(つまりポインタが入っていない)なら
-		if (!upTask)
+		if (!spTask)
 		{
 			// 戻る
 			continue;
 		}
 		// IDが一致するTaskが見つかったら
-		if (upTask->getTaskId() == id)
+		if (spTask->getTaskId() == id)
 		{
 			// retに生ポインタをget()を通して入れる
-			ret = upTask.get();
+			ret = spTask.get();
 			break;
 		}
 	}
@@ -41,7 +41,7 @@ Task* TaskManager::search(int id)
 }
 
 
-bool TaskManager::addObject(std::unique_ptr<Task> _Object)
+bool TaskManager::addObject(std::shared_ptr<Task> _Object)
 {
 
 
@@ -52,8 +52,10 @@ bool TaskManager::addObject(std::unique_ptr<Task> _Object)
 		return false;
 	}
 
-	// vectorへの追加(unique_ptrの所有権の移譲でもあるのでmove()を使う)
-	pTaskArray.push_back(std::move(_Object));
+
+
+	// vectorへの追加
+	pTaskArray.push_back(_Object);
 
 
 	return true;
@@ -68,10 +70,10 @@ void TaskManager::removeObject(Task* _pObject)
 	for (size_t i = 0; i < pTaskArray.size(); i++)
 	{
 		// vector要素の参照を取る
-		std::unique_ptr<Task>& upTask = pTaskArray[i];
+		std::shared_ptr<Task>& spTask = pTaskArray[i];
 
 		// .get()で出した生ポインタと引数が一致したら
-		if (upTask.get() == _pObject)
+		if (spTask.get() == _pObject)
 		{
 			// vectorの.erase()で初期インデックス(.begin())にi(現在見ているインデックス)を足したインデックスの要素を削除
 			pTaskArray.erase(pTaskArray.begin() + i);
@@ -86,34 +88,34 @@ void TaskManager::removeObject(Task* _pObject)
 
 void TaskManager::taskUpdateAll()
 {
-	for (std::unique_ptr<Task>& upTask : pTaskArray)
+	for (std::shared_ptr<Task>& spTask : pTaskArray)
 	{
 
 
 		// NULLだったら
-		if (!upTask)
+		if (!spTask)
 		{
 			// これ以上何もせず次の要素に
 			continue;
 		}
 
 		
-		int curState = upTask->getTaskState();
+		int curState = spTask->getTaskState();
 
 		// タスクが死亡状態か
 		if (curState == Task::INACTIVE)
 		{
 			// 削除
-			upTask.reset(nullptr);
+			spTask.reset();
 
 			// 次の要素へ
 			continue;
 		}
 		if (curState == Task::READY)
 		{
-			upTask->activate();
+			spTask->activate();
 		}
-		upTask->Update();
+		spTask->Update();
 
 	}
 }

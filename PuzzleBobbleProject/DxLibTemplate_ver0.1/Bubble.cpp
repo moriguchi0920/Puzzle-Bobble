@@ -5,27 +5,34 @@ Bubble::Bubble(int _col, Float2 _pos, float _radius) : Task(TaskManager::getInst
 	switch (_col)
 	{
 	case COLOR::COL_RED:
-		col.set(255, 0, 0);
+		rCir.setColor(255, 0, 0);
 		break;
 	case COLOR::COL_BLUE:
-		col.set(0, 0, 255);
+		rCir.setColor(0, 0, 255);
 		break;
 	case COLOR::COL_YELLOW:
-		col.set(255, 255, 0);
+		rCir.setColor(255, 255, 0);
 		break;
 	case COLOR::COL_GREEN:
-		col.set(0, 255, 0);
+		rCir.setColor(0, 255, 0);
 		break;
 	case COLOR::COL_ORANGE:
-		col.set(255, 128, 0);
+		rCir.setColor(255, 128, 0);
 		break;
 	case COLOR::COL_PURPLE:
-		col.set(255, 0, 255);
+		rCir.setColor(255, 0, 255);
 		break;
 	}
+	color = _col;
 	canDestroy = false;
 	isChecked = false;
 	RenderableManager::getInstance()->addObject(&rCir);
+	state = STATE::RELOAD;
+}
+
+Bubble::~Bubble()
+{
+
 }
 
 void Bubble::Update()
@@ -43,11 +50,21 @@ void Bubble::activateProc()
 
 void Bubble::deactivateProc()
 {
+	CollisionManager::getInstance()->removeObject(&cBubble);
+	RenderableManager::getInstance()->removeObject(&rCir);
+
 }
 
-DebugColor& Bubble::getColor()
+int Bubble::getColor()
 {
-	return col;
+	return color;
+}
+
+void Bubble::setState(int newState)
+{
+	if (STATE::NUM <= state) return;
+
+	state = newState;
 }
 
 void Bubble::move(Vector2D vec, float speed)

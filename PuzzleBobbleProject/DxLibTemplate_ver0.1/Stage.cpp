@@ -24,16 +24,16 @@ Stage::Stage(std::vector<int>* stageInfoBuffer) : Task(TaskManager::getInstance(
 			}
 			if (stageInfoBuffer[i][j] <= Bubble::COLOR::COL_DEFAULT)
 			{
-				stageBubbles[i][j] = nullptr;
+				stageBubbles[i][j].reset();
 			}
 			else
 			{
 				bool isEven = i % 2 == 0;
-				float x = isEven ? 100 + BUBBLE_RADIUS * i * 2 : 100 + BUBBLE_RADIUS * i * 2 + BUBBLE_RADIUS;
-				float y = j * 100 + BUBBLE_RADIUS * 2;
+				float x = isEven ? 100 + BUBBLE_RADIUS * j * 2 : 100 + BUBBLE_RADIUS * j * 2 + BUBBLE_RADIUS;
+				float y = i * BUBBLE_RADIUS * 2 + BUBBLE_RADIUS;
 
 				Float2 position(x, y);
-				stageBubbles[i][j] = std::make_shared<Bubble>(stageInfoBuffer[i][j], position, BUBBLE_RADIUS);
+				stageBubbles[i][j] = BubbleGenerator::getInstance().generate(stageInfoBuffer[i][j], position, BUBBLE_RADIUS);
 
 
 			}
@@ -43,8 +43,8 @@ Stage::Stage(std::vector<int>* stageInfoBuffer) : Task(TaskManager::getInstance(
 
 	for (int i = 0; i < 2; i++)
 	{
-		Float2 begin(75 + i * 500, 0);
-		Float2 end(75 + i * 500, 650);
+		Float2 begin(75 + i * 400, 0);
+		Float2 end(75 + i * 400, 650);
 		rWalls[i].set(begin, end);
 
 		CollisionManager::getInstance()->addObject(&cWalls[i]);
@@ -79,13 +79,35 @@ void Stage::deactivateProc()
 {
 }
 
+std::vector<int> Stage::getExistColor()
+{
+	stageExistColorBuffer.clear();
+
+	for (int i = 0; i < COL; i++)
+	{
+		for (int j = 0; j < ROW_EVEN; j++)
+		{
+			if (i % 2 == 1 && 7 <= j)
+			{
+				continue;
+			}
+			if (std::find(stageExistColorBuffer.begin(), stageExistColorBuffer.end(), stageBubbles[i][j].lock()->getColor()) != stageExistColorBuffer.end())
+				stageExistColorBuffer.push_back(stageBubbles[i][j].lock()->getColor());
+
+		}
+	}
+
+
+	return stageExistColorBuffer;
+}
+
 bool Stage::CheckBubbleMatch(int colIdx, int rowIdx)
 {
-	if (!stageBubbles[colIdx][rowIdx]) return false;
+	if (!stageBubbles[colIdx][rowIdx].lock()) return false;
 	// チェック済みならreturnして弾く
-	if (stageBubbles[colIdx][rowIdx]->getIsChecked()) return false;
+	if (stageBubbles[colIdx][rowIdx].lock()->getIsChecked()) return false;
 	// ここを通っているということは少なくとも最初の一個目か一個目と同色なのでチェック済みに
-	stageBubbles[colIdx][rowIdx]->setIsChecked(true);
+	stageBubbles[colIdx][rowIdx].lock()->setIsChecked(true);
 
 	// 縦のインデックスで場合分け
 	switch (colIdx % 2)
@@ -119,10 +141,10 @@ bool Stage::CheckBubbleMatch(int colIdx, int rowIdx)
 			if (nextCol < 0 ||  nextRow < 0 || COL < nextCol || ROW_ODD < nextRow)
 				continue;
 
-			if (stageBubbles[colIdx + CheckIdxOffsetEven[i][0]][rowIdx + CheckIdxOffsetEven[i][1]]) continue;
+			if (!stageBubbles[colIdx + CheckIdxOffsetEven[i][0]][rowIdx + CheckIdxOffsetEven[i][1]].lock()) continue;
 
 			// 引数に指定されたバブルの色と今見ているバブルの色が一致していたら
-			if (stageBubbles[colIdx][rowIdx]->getColor() == stageBubbles[colIdx + CheckIdxOffsetEven[i][0]][rowIdx + CheckIdxOffsetEven[i][1]]->getColor())
+			if (stageBubbles[colIdx][rowIdx].lock()->getColor() == stageBubbles[colIdx + CheckIdxOffsetEven[i][0]][rowIdx + CheckIdxOffsetEven[i][1]].lock()->getColor())
 			{
 				// 破壊カウントをカウントアップ
 				VanishCount++;
@@ -142,10 +164,10 @@ bool Stage::CheckBubbleMatch(int colIdx, int rowIdx)
 			if (nextCol < 0 || nextRow < 0 || COL < nextCol || ROW_EVEN < nextRow)
 				continue;
 
-			if (stageBubbles[colIdx + CheckIdxOffsetEven[i][0]][rowIdx + CheckIdxOffsetEven[i][1]]) continue;
+			if (!stageBubbles[colIdx + CheckIdxOffsetEven[i][0]][rowIdx + CheckIdxOffsetEven[i][1]].lock()) continue;
 
 			// 引数に指定されたバブルの色と今見ているバブルの色が一致していたら
-			if (stageBubbles[colIdx][rowIdx]->getColor() == stageBubbles[colIdx + CheckIdxOffsetOdd[i][0]][rowIdx + CheckIdxOffsetOdd[i][1]]->getColor())
+			if (stageBubbles[colIdx][rowIdx].lock()->getColor() == stageBubbles[colIdx + CheckIdxOffsetOdd[i][0]][rowIdx + CheckIdxOffsetOdd[i][1]].lock()->getColor())
 			{
 				// 破壊カウントをカウントアップ
 				VanishCount++;
@@ -167,4 +189,64 @@ void Stage::Vanish()
 
 
 
+}
+
+Stage::Ballista::Ballista() : Task(TaskManager::getInstance()->generateId())
+{
+
+	rotation = PI / 2;
+
+}
+
+Stage::Ballista::~Ballista()
+{
+}
+
+
+void Stage::Ballista::shoot()
+{
+}
+
+void Stage::Ballista::wait()
+{
+	if (CheckHitKey(KEY_INPUT_LEFT))
+	{
+		rotation -= 0.01;
+	}
+	if (CheckHitKey(KEY_INPUT_RIGHT))
+	{
+		rotation += 0.01;
+	}
+
+	
+
+}
+
+void Stage::Ballista::reload(std::vector<int> buffer)
+{
+	Float2 pos(200.0, 500.0);
+	if (buffer.size() <= 0) return;
+
+	int r = GetRand(buffer.size());
+
+
+	shootBubbles.push(BubbleGenerator::getInstance().generate(buffer[r], pos, BUBBLE_RADIUS));
+
+}
+
+void Stage::Ballista::Update()
+{
+}
+
+bool Stage::Ballista::Destroy()
+{
+	return false;
+}
+
+void Stage::Ballista::activateProc()
+{
+}
+
+void Stage::Ballista::deactivateProc()
+{
 }

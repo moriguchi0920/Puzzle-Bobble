@@ -5,6 +5,8 @@
 #include"Line.h"
 #include"Rect.h"
 #include"Circle.h"
+#include"debug_color.h"
+#include"DxLib.h"
 
 // 描画物を表現する基底クラス
 // 0.0 ~ 1.0の範囲の描画順変数を保持し、
@@ -52,10 +54,13 @@ class RenderableLine : public Renderable
 {
 protected:
 	Line line;
+	DebugColor color;
 public:
 	RenderableLine();
 	RenderableLine(float _priority, Float2 _begin, Float2 _end);
 	void set(Float2 _begin, Float2 _end);
+	void setColor(int r, int g, int b, int a = 255);
+	DebugColor& getColor();
 	virtual void render() override;
 
 };
@@ -65,10 +70,13 @@ class RenderableRect : public Renderable
 {
 protected:
 	Rect rect;
+	DebugColor color;
 public:
 	RenderableRect();
 	RenderableRect(float _priority, Float2 _leftTop, Float2 _size);
 	void set(Float2 _leftTop, Float2 _size);
+	void setColor(int r, int g, int b, int a = 255);
+	DebugColor& getColor();
 	virtual void render() override;
 
 };
@@ -78,10 +86,13 @@ class RenderableCircle : public Renderable
 {
 protected:
 	Circle circle;
+	DebugColor color;
 public:
 	RenderableCircle();
 	RenderableCircle(float _priority, Float2 _pos, float _radius);
 	void set(Float2 _pos, float _radius);
+	void setColor(int r, int g, int b, int a = 255);
+	DebugColor& getColor();
 	virtual void render() override;
 
 };

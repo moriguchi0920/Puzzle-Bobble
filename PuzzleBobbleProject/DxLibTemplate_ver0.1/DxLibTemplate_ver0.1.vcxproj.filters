@@ -126,6 +126,9 @@
     <ClCompile Include="Stage.cpp">
       <Filter>Object</Filter>
     </ClCompile>
+    <ClCompile Include="BubbleGenerator.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AnimationRepository.h">
@@ -207,6 +210,9 @@
       <Filter>System\Task</Filter>
     </ClInclude>
     <ClInclude Include="Stage.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="BubbleGenerator.h">
       <Filter>Object</Filter>
     </ClInclude>
   </ItemGroup>

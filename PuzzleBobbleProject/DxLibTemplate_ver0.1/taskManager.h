@@ -3,8 +3,10 @@
 #include"collisionManager.h"
 #include<vector>
 #include<memory>
-// タスクの配列を保持し、全てのオブジェクトの更新、破壊を行うクラス
 
+
+
+// タスクの配列を保持し、全てのオブジェクトの更新、破壊を行うクラス
 class TaskManager
 {
 private :
@@ -18,7 +20,7 @@ public:
 	}
 private :
 	//Task* pTaskArray[ALL_OBJECT_MAX];
-	std::vector<std::unique_ptr<Task>> pTaskArray;
+	std::vector<std::shared_ptr<Task>> pTaskArray;
 	int lastId;
 
 private :
@@ -32,7 +34,7 @@ public:
 	virtual ~TaskManager();
 
 	Task* search(int id);
-	bool addObject(std::unique_ptr<Task> _Object);
+	bool addObject(std::shared_ptr<Task> _Object);
 	void removeObject(Task* _pObject);
 	void taskUpdateAll();
 	void taskRenderAll();

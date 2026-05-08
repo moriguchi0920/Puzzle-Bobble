@@ -2,7 +2,9 @@
 #include "taskManager.h"
 #include"renderableManager.h"
 #include"Bubble.h"
+#include"BubbleGenerator.h"
 #include<memory>
+#include<queue>
 
 // ステージの盤を表現するクラス
 // ボールの生成管理も担当するため実質的にマネージャークラス
@@ -12,8 +14,40 @@ class Stage final: public Task
 protected:
 	// バブルの二次元配列(8,7,8,7...と続くためstd::vectorのresizeで表現する)
 	// 縦は13列
-	std::vector<std::shared_ptr<Bubble>> stageBubbles[13];
+	std::vector<std::weak_ptr<Bubble>> stageBubbles[13];
+
+	std::vector<int> stageExistColorBuffer;
 	
+	class Ballista : public Task
+	{
+	public:
+		std::queue<std::weak_ptr<Bubble>> shootBubbles;
+
+		float rotation;
+
+
+
+	public:
+		Ballista();
+
+		~Ballista();
+
+		void shoot();
+
+		void wait();
+
+		void reload(std::vector<int> buffer);
+
+		// 更新
+		void Update() override;
+
+		// 破壊判定
+		bool Destroy() override;
+
+		virtual void activateProc() override;
+		virtual void deactivateProc() override;
+	};
+
 
 	// バブルを破壊するときのカウント
 	// 3以上だった場合canDestroyがtrueのBubbleを一括破壊させる
@@ -44,6 +78,7 @@ public:
 	virtual void activateProc() override;
 	virtual void deactivateProc() override;
 
+	std::vector<int> getExistColor();
 
 	// バブル破壊判定用の関数
 	// 内部で指定したインデックスのバブルの周囲のマスのバブルを確認し、
