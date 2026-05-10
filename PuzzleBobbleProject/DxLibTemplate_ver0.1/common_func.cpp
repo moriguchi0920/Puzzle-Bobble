@@ -47,21 +47,21 @@ void GetMouseXnY(Point* pPoint)
 	int mouse_x;
 	int mouse_y;
 	GetMousePoint(&mouse_x, &mouse_y);
-	pPoint->x = (double)mouse_x;
-	pPoint->y = (double)mouse_y;
+	pPoint->x = (float)mouse_x;
+	pPoint->y = (float)mouse_y;
 }
 // 二点間の距離の取得
-double GetDistance(double x1, double y1, double x2, double y2)
+float GetDistance(float x1, float y1, float x2, float y2)
 {
 	return sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 
 
 }
 // 二点間の距離の取得(Point版)
-double GetDistance(Point pos1, Point  pos2)
+float GetDistance(Point pos1, Point  pos2)
 {
-	double x = pos1.x - pos2.x;
-	double y = pos1.y - pos2.y;
+	float x = pos1.x - pos2.x;
+	float y = pos1.y - pos2.y;
 
 	return sqrt(x * x + y * y);
 
@@ -245,7 +245,7 @@ bool CheckLineHit(Line l1, Line l2, ContactInfo* pContact)
 	// そのため、同じ判定を線分CDを基準にABを代入して行い、
 	// 掛けた結果が両方とも負だった場合は二つの線分の端点が互いに違う領域にいる
 	// (交わっている)ことがわかるので、二つの線分の接触判定ができる。
-	double s, t;
+	float s, t;
 	// l1基準での交差
 	// s, tはそれぞれl1の方程式にl2の端二点を代入したもので、ベクトルの外積でもある
 	s = (l1.begin.x - l1.end.x) * (l2.begin.y - l1.begin.y) - (l1.begin.y - l1.end.y) * (l2.begin.x - l1.begin.x);
@@ -264,8 +264,8 @@ bool CheckLineHit(Line l1, Line l2, ContactInfo* pContact)
 		// 上で交差判定は終わっているので、
 		// 交差していることが確定している
 		// よってs-tで割ったs(外積の面積比)を出し、それぞれのベクトルのx, yに足すことで交点座標が出せる
-		double x = l2.begin.x + ((l2.end.x - l2.begin.x) * s / (s-t));
-		double y = l2.begin.y + ((l2.end.y - l2.begin.y) * s / (s-t));
+		float x = l2.begin.x + ((l2.end.x - l2.begin.x) * s / (s-t));
+		float y = l2.begin.y + ((l2.end.y - l2.begin.y) * s / (s-t));
 		Point intersection(x, y);
 		pContact->position = intersection;
 
@@ -340,22 +340,22 @@ bool CheckLineCircleHit(Line l1, Circle c1, ContactInfo* pContact)
 	Point end_to_center(c1.pos.x - l1.end.x, c1.pos.y - l1.end.y);
 	// 線分の始点から終点のベクトル
 	Point start_to_end(l1.end.x - l1.begin.x, l1.end.y - l1.begin.y);
-	double dis = GetDistance(l1.begin.x, l1.begin.y, l1.end.x, l1.end.y);
+	float dis = GetDistance(l1.begin.x, l1.begin.y, l1.end.x, l1.end.y);
 	if (dis <= 1.0) return false;
 
 	// 外積を用いて線分と円の最短距離を求める
-	double shortest_dis = (start_to_center.x * start_to_end.y - start_to_end.x * start_to_center.y) / dis;
+	float shortest_dis = (start_to_center.x * start_to_end.y - start_to_end.x * start_to_center.y) / dis;
 
 	// 始点から円の中心、始点から終点のベクトルの内積(なす角のコサイン * ベクトルの長さ)
-	double dotS = start_to_center.x * start_to_end.x + start_to_center.y * start_to_end.y;
+	float dotS = start_to_center.x * start_to_end.x + start_to_center.y * start_to_end.y;
 	// 終点から円の中心、始点から終点のベクトルの内積(なす角のコサイン * ベクトルの長さ)
-	double dotE = end_to_center.x * start_to_end.x + end_to_center.y * start_to_end.y;
+	float dotE = end_to_center.x * start_to_end.x + end_to_center.y * start_to_end.y;
 
 	if (pContact)
 	{
-		double lengthStoE = dis;
-		double lengthStoC = GetDistance(c1.pos.x, c1.pos.y, l1.begin.x, l1.begin.y);
-		double theta = dotS / (lengthStoC * lengthStoE);
+		float lengthStoE = dis;
+		float lengthStoC = GetDistance(c1.pos.x, c1.pos.y, l1.begin.x, l1.begin.y);
+		float theta = dotS / (lengthStoC * lengthStoE);
 		Point roughIntersection(c1.pos.x + shortest_dis * cos(theta), c1.pos.y + shortest_dis * sin(theta));
 		pContact->position = roughIntersection;
 		if (abs(l1.begin.x - l1.end.x) < 0.01)
@@ -403,22 +403,22 @@ bool CheckLinePointHit(Line l1, Point p1, ContactInfo* pContact)
 	Point start_to_end(l1.end.x - l1.begin.x, l1.end.y - l1.begin.y);
 
 	// ベクトルの内積
-	double dot = start_to_point.x * start_to_end.x + start_to_point.y * start_to_end.y;
+	float dot = start_to_point.x * start_to_end.x + start_to_point.y * start_to_end.y;
 	// 内積が0より下だったら垂線を下ろせない(当たっていない)
 	if (dot < 0.0)
 	{
 		return false;
 	}
 	// 始点から点までの長さ
-	double lengthStoP = GetDistance(p1.x, p1.y, l1.begin.x, l1.begin.y);
+	float lengthStoP = GetDistance(p1.x, p1.y, l1.begin.x, l1.begin.y);
 	// 始点から終点までの長さ
-	double lengthStoE = GetDistance(l1.begin.x, l1.begin.y, l1.end.x, l1.end.y);
+	float lengthStoE = GetDistance(l1.begin.x, l1.begin.y, l1.end.x, l1.end.y);
 
 	// 垂線の長さは始点から点までの長さ * sin始点から点への角度
 	// 上で求めた内積は始点から点 * 始点から終点の長さ * cos始点から点への角度
 	// 内積の公式よりベクトルのなす角θを求めるには内積 / 各ベクトルの長さを掛けたもの
-	double theta = dot / (lengthStoP * lengthStoE);
-	double perpendicular = abs(lengthStoP * sin(theta));
+	float theta = dot / (lengthStoP * lengthStoE);
+	float perpendicular = abs(lengthStoP * sin(theta));
 
 	if (0.1 < perpendicular)
 	{
@@ -442,17 +442,17 @@ float radToDeg(float rad)
 }
 
 // 二点間の角度から第三引数に指定した範囲にランダムな角度を取る関数
-double GetRandomPositiveAngleFromPoint(Point* pPos1, Point* pPos2, double range)
+float GetRandomPositiveAngleFromPoint(Point* pPos1, Point* pPos2, float range)
 {
-	double angle = atan2(pPos2->y - pPos1->y, pPos2->x - pPos1->x);
-	double r = degToRad(GetRand(range * 2) - range);
+	float angle = atan2(pPos2->y - pPos1->y, pPos2->x - pPos1->x);
+	float r = degToRad(GetRand(range * 2) - range);
 	return angle + r;
 	
 }
 
-void smoothMoving(Point* pMovingPos, Point* pEndPos, double speed)
+void smoothMoving(Point* pMovingPos, Point* pEndPos, float speed)
 {
-	double angle = atan2(pMovingPos->y - pEndPos->y, pMovingPos->x - pEndPos->x);
+	float angle = atan2(pMovingPos->y - pEndPos->y, pMovingPos->x - pEndPos->x);
 	pMovingPos->x += cos(angle) * speed;
 	pMovingPos->y += sin(angle) * speed;
 }
@@ -476,7 +476,7 @@ bool isOutScreen(Point pos, Point size)
 	}
 	return false;
 }
-bool isOutScreen(Point pos, double r)
+bool isOutScreen(Point pos, float r)
 {
 	if (pos.x <= r * 2 || WINDOW_WIDTH <= pos.x - r * 2
 		|| pos.y <= r * 2 || WINDOW_HEIGHT <= pos.y - r * 2)
@@ -486,7 +486,7 @@ bool isOutScreen(Point pos, double r)
 	return false;
 }
 // 左側にスクロールしたかどうかの判定
-bool isScrolled(double pos_x, double width)
+bool isScrolled(float pos_x, float width)
 {
 	if (pos_x <= -width)
 	{
@@ -497,9 +497,9 @@ bool isScrolled(double pos_x, double width)
 
 
 // 浮動小数点型のランダムを取る
-double getRandomDoubleWithDigits(int beforeDecimal, int afterDecimalDigit)
+float getRandomfloatWithDigits(int beforeDecimal, int afterDecimalDigit)
 {
-	double result = GetRand(beforeDecimal);
+	float result = GetRand(beforeDecimal);
 	int divideNum = 10;
 	for (int i = 0; i < afterDecimalDigit; i++)
 	{
@@ -511,7 +511,7 @@ double getRandomDoubleWithDigits(int beforeDecimal, int afterDecimalDigit)
 // ベクトル正規化関数
 Vector2D GetNormalize(Vector2D vec)
 {
-	double length = sqrt(vec.x * vec.x + vec.y * vec.y);
+	float length = sqrt(vec.x * vec.x + vec.y * vec.y);
 	return vec / length;
 }
 // ベクトルを法線に変換する関数
@@ -524,16 +524,16 @@ Vector2D GetNormal(Vector2D vec)
 }
 
 // ベクトル外積関数
-double GetCross(Vector2D vec1, Vector2D vec2)
+float GetCross(Vector2D vec1, Vector2D vec2)
 {
-	double ret;
+	float ret;
 	ret = (vec1.x * vec2.y) - (vec1.y * vec2.x);
 	return ret;
 }
 // ベクトル内積関数
-double GetDot(Vector2D vec1, Vector2D vec2)
+float GetDot(Vector2D vec1, Vector2D vec2)
 {
-	double ret;
+	float ret;
 	ret = (vec1.x * vec2.x) + (vec1.y * vec2.y);
 	return ret;
 }

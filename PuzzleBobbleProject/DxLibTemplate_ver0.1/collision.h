@@ -70,4 +70,13 @@ public:
 };
 
 
+class CStageBubble : public CollisionObject
+{
+public:
+	virtual CollisionMark getMark() override;
+	virtual bool isCollideTarget(CollisionMark mark) override;
+};
+
+
+
 

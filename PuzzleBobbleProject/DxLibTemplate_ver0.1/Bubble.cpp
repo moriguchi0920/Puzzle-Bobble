@@ -56,7 +56,8 @@ void Bubble::Update()
 		}
 		else
 		{
-			position.x = BALLISTA_BASE_X;
+			Float2 pos(BALLISTA_BASE_X, position.y);
+			setPos(pos);
 			setState(STATE::READY);
 		}
 		break;

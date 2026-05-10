@@ -131,55 +131,111 @@ std::vector<int> Stage::getExistColor()
 }
 
 void Stage::registerShootBubble(std::weak_ptr<Bubble> shoot)
-{
+{ 
 	auto s = shoot.lock();
 	if (!s) return;
 
-	int shootPosY = (s->getPos().y);
+	float shootPosY = (s->getPos().y);
 
-	int y = shootPosY / (BUBBLE_RADIUS * 2);
+	int y = std::round(shootPosY / (BUBBLE_RADIUS * 2));
 
-	int shootPosX = (s->getPos().x - STAGE_OFFSET_X - (y % 2 == 0 ? BUBBLE_RADIUS : BUBBLE_RADIUS * 2));
+	float shootPosX = (s->getPos().x - STAGE_OFFSET_X - (y % 2 == 0 ? BUBBLE_RADIUS : BUBBLE_RADIUS * 2));
 
-	int x =  shootPosX / (BUBBLE_RADIUS * 2);
+	int x = std::round(shootPosX / (BUBBLE_RADIUS * 2));
 
-
-	if (stageBubbles[x][y].lock())
-	{
-
-		for (int i = 0; i < DIRECTION; i++)
-		{
-
-		}
-	}
-
+	if (COL < y) return;
 
 	if (y % 2 == 0)
 	{
-
-		x = fix(x, 0, 8);
-		float posX = STAGE_OFFSET_X + BUBBLE_RADIUS * x * 2 + BUBBLE_RADIUS ;
-		float posY = y * BUBBLE_RADIUS * 2 + BUBBLE_RADIUS;
-		s->setPos(Float2(posX, posY));
+		x = fix(x, 0, 8 - 1);
 	}
 	else
 	{
-
-		x = fix(x, 0, 7);
-		float posX = STAGE_OFFSET_X + BUBBLE_RADIUS * x * 2 + BUBBLE_RADIUS * 2;
-		float posY = y * BUBBLE_RADIUS * 2 + BUBBLE_RADIUS;
-		s->setPos(Float2(posX, posY));
-
+		x = fix(x, 0, 7 - 1);
 	}
 
+	
+ 	if (stageBubbles[y][x].lock())
+	{
+
+		int setX = 0;
+		int setY = 0;
+		float nearDis = 10000.0f;
+		for (int i = 0; i < DIRECTION; i++)
+		{
+			if (y % 2 == 0)
+			{
+				int offsetX = CheckIdxOffsetEven[i][0];
+				int offsetY = CheckIdxOffsetEven[i][1];
+
+				if (x + offsetX < 0 || ROW_EVEN <= x + offsetX) continue;
+				if (y + offsetY < 0 || COL <= y + offsetY) continue;
+
+				float dis = GetDistance(shootPosX, shootPosY, BUBBLE_RADIUS * (x + offsetX) * 2 + BUBBLE_RADIUS, (y + offsetY) * BUBBLE_RADIUS * 2 + BUBBLE_RADIUS);
 
 
 
-	stageBubbles[x][y] = shoot;
+
+				if (dis < nearDis)
+				{
+					nearDis = dis;
+					setX = offsetX;
+					setY = offsetY;
+				}
+			}
+			else
+			{
+				int offsetX = CheckIdxOffsetOdd[i][0];
+				int offsetY = CheckIdxOffsetOdd[i][1];
+
+				if (x + offsetX < 0 || ROW_ODD <= x + offsetX) continue;
+				if (y + offsetY < 0 || COL <= y + offsetY) continue;
+
+				float dis = GetDistance(shootPosX, shootPosY, BUBBLE_RADIUS * (x + offsetX) * 2 + BUBBLE_RADIUS * 2, (y + offsetY) * BUBBLE_RADIUS * 2 + BUBBLE_RADIUS);
+
+
+				if (dis < nearDis)
+				{
+					nearDis = dis;
+					setX = offsetX;
+					setY = offsetY;
+				}
+
+			}
+			
+		}
+		x += setX;
+		y += setY;
+	}
+
+		if (y % 2 == 0)
+		{
+
+
+			float posX = STAGE_OFFSET_X + BUBBLE_RADIUS * x * 2 + BUBBLE_RADIUS;
+			float posY = y * BUBBLE_RADIUS * 2 + BUBBLE_RADIUS;
+			s->setPos(Float2(posX, posY));
+		}
+		else
+		{
+
+
+			float posX = STAGE_OFFSET_X + BUBBLE_RADIUS * x * 2 + BUBBLE_RADIUS * 2;
+			float posY = y * BUBBLE_RADIUS * 2 + BUBBLE_RADIUS;
+			s->setPos(Float2(posX, posY));
+
+		}
+	
+
+
+
+		stageBubbles[y][x] = shoot;
+
 }
 
+
 bool Stage::CheckBubbleMatch(int colIdx, int rowIdx)
-{
+{ 
 	if (!stageBubbles[colIdx][rowIdx].lock()) return false;
 	// チェック済みならreturnして弾く
 	if (stageBubbles[colIdx][rowIdx].lock()->getIsChecked()) return false;
@@ -273,7 +329,7 @@ Stage::Ballista::Ballista()
 	RenderableManager::getInstance()->addObject(&rLine);
 	rotation = -PI / 2;
 	Float2 base(BALLISTA_BASE_X, BALLISTA_BASE_Y);
-	Float2 top(base.x, base.y - 30.0f);
+	Float2 top(base.x, base.y - 50.0f);
 
 	state = Ballista::DEFAULT;
 	rLine.set(base, top);
@@ -300,7 +356,7 @@ void Stage::Ballista::wait()
 	{
 		rotation += 0.05;
 	}
-	rLine.set(Float2(BALLISTA_BASE_X, BALLISTA_BASE_Y), Float2(BALLISTA_BASE_X + 30.0f * cosf(rotation), BALLISTA_BASE_Y + 30.0f * sinf(rotation)));
+	rLine.set(Float2(BALLISTA_BASE_X, BALLISTA_BASE_Y), Float2(BALLISTA_BASE_X + 50.0f * cosf(rotation), BALLISTA_BASE_Y + 50.0f * sinf(rotation)));
 	
 
 }

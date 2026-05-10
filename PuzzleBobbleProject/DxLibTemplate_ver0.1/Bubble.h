@@ -36,7 +36,7 @@ public:
 	// 引数付きコンストラクタ
 	Bubble(int _col, Float2 _pos, float _radius);
 
-	~Bubble();
+	virtual ~Bubble();
 
 	// 更新
 	void Update() override;

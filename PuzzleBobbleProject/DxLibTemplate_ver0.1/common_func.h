@@ -19,8 +19,8 @@ int fix(int val, int min, int max);
 
 bool CheckMouseInput(int button);
 void GetMouseXnY(Point* pPoint);
-double GetDistance(double x1, double y1, double x2, double y2);
-double GetDistance(Point pos1, Point  pos2);
+float GetDistance(float x1, float y1, float x2, float y2);
+float GetDistance(Point pos1, Point  pos2);
 bool CheckPointHit(Point p1, Point p2, ContactInfo* pContact = NULL);
 bool CheckCircleHit(float x1, float y1, float r1, float x2, float y2, float r2);
 bool CheckCircleHit(Circle c1, Circle c2, ContactInfo* pContact = NULL);
@@ -41,17 +41,17 @@ bool CheckLinePointHit(Line l1, Point p1, ContactInfo* pContact = NULL);
 float radToDeg(float rad);
 float degToRad(float deg);
 
-double GetRandomPositiveAngleFromPoint(Point* pPos1, Point* pPos2, double range);
+float GetRandomPositiveAngleFromPoint(Point* pPos1, Point* pPos2, float range);
 bool isOutScreen(Point pos);
 bool isOutScreen(Point pos, Point size);
-bool isOutScreen(Point pos, double r);
-bool isScrolled(double pos_x, double width);
-double getRandomDoubleWithDigits(int beforeDecimal, int afterDecimalDigit);
+bool isOutScreen(Point pos, float r);
+bool isScrolled(float pos_x, float width);
+float getRandomfloatWithDigits(int beforeDecimal, int afterDecimalDigit);
 
 Vector2D GetNormalize(Vector2D vec);
 Vector2D GetNormal(Vector2D vec);
-double GetCross(Vector2D vec1, Vector2D vec2);
-double GetDot(Vector2D vec1, Vector2D voec2);
+float GetCross(Vector2D vec1, Vector2D vec2);
+float GetDot(Vector2D vec1, Vector2D voec2);
 Vector2D specularReflection(Vector2D refVec, Vector2D baseVec);
 bool isSameOrNegativeVector(Vector2D vec1, Vector2D vec2);
 
