@@ -19,7 +19,7 @@ private:
 	std::vector<CollisionObject*> collisionObjectTable[CollisionObject::CollisionMark::COLLISION_MARK_NUM];
 
 	// 接触情報保存配列
-	std::vector<std::unique_ptr<CollisionInfo>> collisionInfoArray;
+	std::vector<std::shared_ptr<CollisionInfo>> collisionInfoArray;
 
 	int lastId;
 
@@ -46,7 +46,7 @@ public:
 	void updateInfo();
 
 	// インデックスから当たり判定情報を検索する関数
-	CollisionInfo* getColInfoFromIdx(int idx);
+	std::weak_ptr<CollisionInfo> getColInfoFromIdx(int idx);
 
 	// すでに情報として保存されている当たり判定を弾く関数
 	bool knownReject(CollisionObject* Ob1, CollisionObject* Ob2);

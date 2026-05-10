@@ -29,12 +29,12 @@ Stage::Stage(std::vector<int>* stageInfoBuffer) : Task(TaskManager::getInstance(
 			else
 			{
 				bool isEven = i % 2 == 0;
-				float x = isEven ? 100 + BUBBLE_RADIUS * j * 2 : 100 + BUBBLE_RADIUS * j * 2 + BUBBLE_RADIUS;
+				float x = isEven ? STAGE_OFFSET_X + BUBBLE_RADIUS * j * 2 + BUBBLE_RADIUS : STAGE_OFFSET_X + BUBBLE_RADIUS * j * 2 + BUBBLE_RADIUS * 2;
 				float y = i * BUBBLE_RADIUS * 2 + BUBBLE_RADIUS;
 
 				Float2 position(x, y);
 				stageBubbles[i][j] = BubbleGenerator::getInstance().generate(stageInfoBuffer[i][j], position, BUBBLE_RADIUS);
-
+				stageBubbles[i][j].lock()->setState(Bubble::STATE::FIXED);
 
 			}
 
@@ -43,9 +43,17 @@ Stage::Stage(std::vector<int>* stageInfoBuffer) : Task(TaskManager::getInstance(
 
 	for (int i = 0; i < 2; i++)
 	{
-		Float2 begin(75 + i * 400, 0);
-		Float2 end(75 + i * 400, 650);
+		Float2 begin(STAGE_OFFSET_X + i * 400, 0);
+		Float2 end(STAGE_OFFSET_X + i * 400, 650);
 		rWalls[i].set(begin, end);
+
+		CLine* c = new CLine;
+		cWalls[i].setShape(c);
+		ShapeSetParam param(ShapeSetParam::PT_LINE_BOTH);
+		param.param.paramPoint2.point1 = begin;
+		param.param.paramPoint2.point2 = end;
+
+		cWalls[i].getShape()->paramUpdate(&param);
 
 		CollisionManager::getInstance()->addObject(&cWalls[i]);
 		RenderableManager::getInstance()->addObject(&rWalls[i]);
@@ -56,12 +64,26 @@ Stage::Stage(std::vector<int>* stageInfoBuffer) : Task(TaskManager::getInstance(
 
 	VanishCount = 0;
 	
+	
+	
 
+	
 }
 
 void Stage::Update()
 {
+	
+	ballista.updateProc(getExistColor());
+	auto s = ballista.shootBubbles.front().lock();
+	if (!s) return;
 
+	if (s->getState() == Bubble::STATE::SHOOT
+		&& s->hit())
+	{
+		s->setState(Bubble::STATE::FIXED);
+		registerShootBubble(s);
+		ballista.shootBubbles.pop();
+	}
 
 
 }
@@ -73,6 +95,7 @@ bool Stage::Destroy()
 
 void Stage::activateProc()
 {
+
 }
 
 void Stage::deactivateProc()
@@ -81,8 +104,10 @@ void Stage::deactivateProc()
 
 std::vector<int> Stage::getExistColor()
 {
+	// いったん色保存バッファをクリア
 	stageExistColorBuffer.clear();
 
+	// バブル配列の走査
 	for (int i = 0; i < COL; i++)
 	{
 		for (int j = 0; j < ROW_EVEN; j++)
@@ -91,14 +116,66 @@ std::vector<int> Stage::getExistColor()
 			{
 				continue;
 			}
-			if (std::find(stageExistColorBuffer.begin(), stageExistColorBuffer.end(), stageBubbles[i][j].lock()->getColor()) != stageExistColorBuffer.end())
+			if (!stageBubbles[i][j].lock()) continue;
+
+			// std::findでvectorの中身を見て要素が存在しない(登録されていない色)だったら
+			if (std::find(stageExistColorBuffer.begin(), stageExistColorBuffer.end(), stageBubbles[i][j].lock()->getColor()) == stageExistColorBuffer.end())
+				// バッファに色情報を追加
 				stageExistColorBuffer.push_back(stageBubbles[i][j].lock()->getColor());
 
 		}
 	}
 
-
+	// 色情報バッファを返す
 	return stageExistColorBuffer;
+}
+
+void Stage::registerShootBubble(std::weak_ptr<Bubble> shoot)
+{
+	auto s = shoot.lock();
+	if (!s) return;
+
+	int shootPosY = (s->getPos().y);
+
+	int y = shootPosY / (BUBBLE_RADIUS * 2);
+
+	int shootPosX = (s->getPos().x - STAGE_OFFSET_X - (y % 2 == 0 ? BUBBLE_RADIUS : BUBBLE_RADIUS * 2));
+
+	int x =  shootPosX / (BUBBLE_RADIUS * 2);
+
+
+	if (stageBubbles[x][y].lock())
+	{
+
+		for (int i = 0; i < DIRECTION; i++)
+		{
+
+		}
+	}
+
+
+	if (y % 2 == 0)
+	{
+
+		x = fix(x, 0, 8);
+		float posX = STAGE_OFFSET_X + BUBBLE_RADIUS * x * 2 + BUBBLE_RADIUS ;
+		float posY = y * BUBBLE_RADIUS * 2 + BUBBLE_RADIUS;
+		s->setPos(Float2(posX, posY));
+	}
+	else
+	{
+
+		x = fix(x, 0, 7);
+		float posX = STAGE_OFFSET_X + BUBBLE_RADIUS * x * 2 + BUBBLE_RADIUS * 2;
+		float posY = y * BUBBLE_RADIUS * 2 + BUBBLE_RADIUS;
+		s->setPos(Float2(posX, posY));
+
+	}
+
+
+
+
+	stageBubbles[x][y] = shoot;
 }
 
 bool Stage::CheckBubbleMatch(int colIdx, int rowIdx)
@@ -126,7 +203,7 @@ bool Stage::CheckBubbleMatch(int colIdx, int rowIdx)
 	}
 
 	// 六方向をforで見回る
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < DIRECTION; i++)
 	{
 		// 偶数列かどうか判定用変数
 		bool isEven = colIdx % 2 == 0;
@@ -191,11 +268,15 @@ void Stage::Vanish()
 
 }
 
-Stage::Ballista::Ballista() : Task(TaskManager::getInstance()->generateId())
+Stage::Ballista::Ballista()
 {
+	RenderableManager::getInstance()->addObject(&rLine);
+	rotation = -PI / 2;
+	Float2 base(BALLISTA_BASE_X, BALLISTA_BASE_Y);
+	Float2 top(base.x, base.y - 30.0f);
 
-	rotation = PI / 2;
-
+	state = Ballista::DEFAULT;
+	rLine.set(base, top);
 }
 
 Stage::Ballista::~Ballista()
@@ -205,48 +286,80 @@ Stage::Ballista::~Ballista()
 
 void Stage::Ballista::shoot()
 {
+	shootBubbles.front().lock()->setVector(Float2(cosf(rotation), sinf(rotation)));
+	shootBubbles.front().lock()->setState(Bubble::SHOOT);
 }
 
 void Stage::Ballista::wait()
 {
-	if (CheckHitKey(KEY_INPUT_LEFT))
+	if (CheckHitKey(KEY_INPUT_LEFT) && -3.14 <= rotation)
 	{
-		rotation -= 0.01;
+		rotation -= 0.05;
 	}
-	if (CheckHitKey(KEY_INPUT_RIGHT))
+	if (CheckHitKey(KEY_INPUT_RIGHT)  && rotation <= 3.14)
 	{
-		rotation += 0.01;
+		rotation += 0.05;
 	}
-
+	rLine.set(Float2(BALLISTA_BASE_X, BALLISTA_BASE_Y), Float2(BALLISTA_BASE_X + 30.0f * cosf(rotation), BALLISTA_BASE_Y + 30.0f * sinf(rotation)));
 	
 
 }
 
-void Stage::Ballista::reload(std::vector<int> buffer)
+void Stage::Ballista::reload(std::vector<int> colorBuffer)
 {
 	Float2 pos(200.0, 500.0);
-	if (buffer.size() <= 0) return;
+	if (colorBuffer.size() <= 0) return;
 
-	int r = GetRand(buffer.size());
+	int r = GetRand(colorBuffer.size() - 1);
 
 
-	shootBubbles.push(BubbleGenerator::getInstance().generate(buffer[r], pos, BUBBLE_RADIUS));
+	shootBubbles.push(BubbleGenerator::getInstance().generate(colorBuffer[r], pos, BUBBLE_RADIUS));
 
 }
 
-void Stage::Ballista::Update()
+void Stage::Ballista::updateProc(std::vector<int> colorBuffer)
 {
+	if (shootBubbles.size() == 0)
+	{
+		reload(colorBuffer);
+		shootBubbles.front().lock()->setState(Bubble::STATE::RELOAD);
+	}
+	auto s = shootBubbles.front().lock();
+	if (!s) return;
+
+
+
+	switch (state)
+	{
+	case BALLISTA_STATE::DEFAULT:
+		if (shootBubbles.front().lock()->getState() == Bubble::STATE::READY)
+		{
+			reload(colorBuffer);
+			state = BALLISTA_STATE::WAIT;
+		}
+		break;
+	case BALLISTA_STATE::RELOAD:
+		shootBubbles.back().lock()->setState(Bubble::STATE::RELOAD);
+		state = BALLISTA_STATE::DEFAULT;
+		break;
+	case BALLISTA_STATE::WAIT:
+		wait();
+		if (pushHitKey(KEY_INPUT_SPACE))
+		{
+			shoot();
+
+			state = BALLISTA_STATE::RELOAD;
+		}
+		break;
+
+	}
 }
 
-bool Stage::Ballista::Destroy()
+std::weak_ptr<Bubble> Stage::Ballista::getShooted()
 {
-	return false;
+	auto s = shootBubbles.front().lock();
+
+	return s;
 }
 
-void Stage::Ballista::activateProc()
-{
-}
 
-void Stage::Ballista::deactivateProc()
-{
-}

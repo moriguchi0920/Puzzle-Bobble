@@ -21,19 +21,29 @@ const int SPRITE_SIZE = 25;
 const int WINDOW_WIDTH = 1024;
 const int WINDOW_HEIGHT = 576;
 
+const int STAGE_OFFSET_X = 312;
+
+
 const double PI = 3.1415926535;
 const float PI_F = 3.141592;
 
 
 const float PRIORITY_SPRITE = 0.5f;
+
+const int DIRECTION = 6;
+
 const int ROW_EVEN = 8;
 const int ROW_ODD = 7;
 
 const int COL = 13;
 
 const int BUBBLE_RADIUS = 25;
+const float BUBBLE_MOVE_SPEED = 15.0f;
 
-const int CheckIdxOffsetEven[6][2] =
+const float BALLISTA_BASE_X = 512.0f;
+const float BALLISTA_BASE_Y = 500.0f;
+
+const int CheckIdxOffsetEven[DIRECTION][2] =
 {
 	{-1, 0},
 	{-1, 1},
@@ -43,7 +53,7 @@ const int CheckIdxOffsetEven[6][2] =
 	{1,  1}
 };
 
-const int CheckIdxOffsetOdd[6][2] =
+const int CheckIdxOffsetOdd[DIRECTION][2] =
 {
 	{-1, -1},
 	{-1, 0},

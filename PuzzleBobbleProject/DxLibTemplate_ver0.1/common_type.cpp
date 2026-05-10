@@ -34,27 +34,27 @@ bool CPoint::checkCollide(CollisionShape* shape, ContactInfo* pContact)
 {
 	if (shape->getShapeType() == OBJECTSHAPE::POINT)
 	{
-		Point* pTarget = dynamic_cast<Point*>(shape);
-		if(pContact)return CheckPointHit(this->point, *pTarget, pContact);
-		return CheckPointHit(this->point, *pTarget);
+		CPoint* pTarget = dynamic_cast<CPoint*>(shape);
+		if(pContact)return CheckPointHit(this->point, pTarget->point, pContact);
+		return CheckPointHit(this->point, pTarget->point);
 	}
 	if (shape->getShapeType() == OBJECTSHAPE::CIRCLE)
 	{
-		Circle* pTarget = dynamic_cast<Circle*>(shape);
-		if(pContact)return CheckPointCircleHit(this->point, *pTarget, pContact);
-		return CheckPointCircleHit(this->point, *pTarget);
+		CCircle* pTarget = dynamic_cast<CCircle*>(shape);
+		if(pContact)return CheckPointCircleHit(this->point, pTarget->circle, pContact);
+		return CheckPointCircleHit(this->point, pTarget->circle);
 	}
 	if (shape->getShapeType() == OBJECTSHAPE::RECT)
 	{
-		Rect* pTarget = dynamic_cast<Rect*>(shape);
-		if (pContact)return CheckPointBoxHit(this->point, *pTarget, pContact);
-		return CheckPointBoxHit(this->point, *pTarget);
+		CRect* pTarget = dynamic_cast<CRect*>(shape);
+		if (pContact)return CheckPointBoxHit(this->point, pTarget->rect, pContact);
+		return CheckPointBoxHit(this->point, pTarget->rect);
 	}
 	if (shape->getShapeType() == OBJECTSHAPE::LINE)
 	{
-		Line* pTarget = dynamic_cast<Line*>(shape);
-		if (pContact)return CheckLinePointHit(*pTarget, this->point, pContact);
-		return CheckLinePointHit(*pTarget, this->point);
+		CLine* pTarget = dynamic_cast<CLine*>(shape);
+		if (pContact)return CheckLinePointHit(pTarget->line, this->point, pContact);
+		return CheckLinePointHit(pTarget->line, this->point);
 	}
 	return false;
 }
@@ -102,27 +102,27 @@ bool CLine::checkCollide(CollisionShape* shape, ContactInfo* pContact)
 {
 	if (shape->getShapeType() == OBJECTSHAPE::POINT)
 	{
-		Point* pTarget = dynamic_cast<Point*>(shape);
-		if(pContact)return CheckLinePointHit(this->line, *pTarget, pContact);
-		return CheckLinePointHit(this->line, *pTarget);
+		CPoint* pTarget = dynamic_cast<CPoint*>(shape);
+		if(pContact)return CheckLinePointHit(this->line, pTarget->point, pContact);
+		return CheckLinePointHit(this->line, pTarget->point);
 	}
 	if (shape->getShapeType() == OBJECTSHAPE::CIRCLE)
 	{
-		Circle* pTarget = dynamic_cast<Circle*>(shape);
-		if(pContact)return CheckLineCircleHit(this->line, *pTarget, pContact);
-		return CheckLineCircleHit(this->line, *pTarget);
+		CCircle* pTarget = dynamic_cast<CCircle*>(shape);
+		if(pContact)return CheckLineCircleHit(this->line, pTarget->circle, pContact);
+		return CheckLineCircleHit(this->line, pTarget->circle);
 	}
 	if (shape->getShapeType() == OBJECTSHAPE::RECT)
 	{
-		Rect* pTarget = dynamic_cast<Rect*>(shape);
-		if(pContact)return CheckLineBoxHit(this->line, *pTarget, pContact);
-		return CheckLineBoxHit(this->line, *pTarget);
+		CRect* pTarget = dynamic_cast<CRect*>(shape);
+		if(pContact)return CheckLineBoxHit(this->line, pTarget->rect, pContact);
+		return CheckLineBoxHit(this->line, pTarget->rect);
 	}
 	if (shape->getShapeType() == OBJECTSHAPE::LINE)
 	{
-		Line* pTarget = dynamic_cast<Line*>(shape);
-		if(pContact)return CheckLineHit(this->line, *pTarget, pContact);
-		return CheckLineHit(this->line, *pTarget);
+		CLine* pTarget = dynamic_cast<CLine*>(shape);
+		if(pContact)return CheckLineHit(this->line, pTarget->line, pContact);
+		return CheckLineHit(this->line, pTarget->line);
 	}
 	return false;
 }
@@ -168,27 +168,27 @@ bool CCircle::checkCollide(CollisionShape* shape, ContactInfo* pContact)
 {
 	if (shape->getShapeType() == OBJECTSHAPE::POINT)
 	{
-		Point* pTarget = dynamic_cast<Point*>(shape);
-		if(pContact) return CheckPointCircleHit(*pTarget, this->circle, pContact);
-		return CheckPointCircleHit(*pTarget, this->circle);
+		CPoint* pTarget = dynamic_cast<CPoint*>(shape);
+		if(pContact) return CheckPointCircleHit(pTarget->point, this->circle, pContact);
+		return CheckPointCircleHit(pTarget->point, this->circle);
 	}
 	if (shape->getShapeType() == OBJECTSHAPE::CIRCLE)
 	{
-		Circle* pTarget = dynamic_cast<Circle*>(shape);
-		if(pContact)return CheckCircleHit(this->circle, *pTarget, pContact);
-		return CheckCircleHit(this->circle, *pTarget);
+		CCircle* pTarget = dynamic_cast<CCircle*>(shape);
+		if(pContact)return CheckCircleHit(this->circle, pTarget->circle, pContact);
+		return CheckCircleHit(this->circle, pTarget->circle);
 	}
 	if (shape->getShapeType() == OBJECTSHAPE::RECT)
 	{
-		Rect* pTarget = dynamic_cast<Rect*>(shape);
-		if(pContact)return CheckCircleBoxHit(this->circle, *pTarget, pContact);
-		return CheckCircleBoxHit(this->circle, *pTarget);
+		CRect* pTarget = dynamic_cast<CRect*>(shape);
+		if(pContact)return CheckCircleBoxHit(this->circle, pTarget->rect, pContact);
+		return CheckCircleBoxHit(this->circle, pTarget->rect);
 	}
 	if (shape->getShapeType() == OBJECTSHAPE::LINE)
 	{
-		Line* pTarget = dynamic_cast<Line*>(shape);
-		if(pContact)return CheckLineCircleHit(*pTarget, this->circle, pContact);
-		return CheckLineCircleHit(*pTarget, this->circle);
+		CLine* pTarget = dynamic_cast<CLine*>(shape);
+		if(pContact)return CheckLineCircleHit(pTarget->line, this->circle, pContact);
+		return CheckLineCircleHit(pTarget->line, this->circle);
 	}
 	return false;
 }
@@ -233,27 +233,27 @@ bool CRect::checkCollide(CollisionShape* shape, ContactInfo* pContact )
 {
 	if (shape->getShapeType() == OBJECTSHAPE::POINT)
 	{
-		Point* pTarget = dynamic_cast<Point*>(shape);
-		if(pContact)return CheckPointBoxHit(*pTarget, this->rect, pContact);
-		return CheckPointBoxHit(*pTarget, this->rect);
+		CPoint* pTarget = dynamic_cast<CPoint*>(shape);
+		if(pContact)return CheckPointBoxHit(pTarget->point, this->rect, pContact);
+		return CheckPointBoxHit(pTarget->point, this->rect);
 	}
 	if (shape->getShapeType() == OBJECTSHAPE::CIRCLE)
 	{
-		Circle* pTarget = dynamic_cast<Circle*>(shape);
-		if(pContact)return CheckCircleBoxHit(*pTarget, this->rect, pContact);
-		return CheckCircleBoxHit(*pTarget, this->rect);
+		CCircle* pTarget = dynamic_cast<CCircle*>(shape);
+		if(pContact)return CheckCircleBoxHit(pTarget->circle, this->rect, pContact);
+		return CheckCircleBoxHit(pTarget->circle, this->rect);
 	}
 	if (shape->getShapeType() == OBJECTSHAPE::RECT)
 	{
-		Rect* pTarget = dynamic_cast<Rect*>(shape);
-		if(pContact)return CheckBoxHit(*pTarget, this->rect, pContact);
-		return CheckBoxHit(this->rect, *pTarget);
+		CRect* pTarget = dynamic_cast<CRect*>(shape);
+		if(pContact)return CheckBoxHit(pTarget->rect, this->rect, pContact);
+		return CheckBoxHit(this->rect, pTarget->rect);
 	}
 	if (shape->getShapeType() == OBJECTSHAPE::LINE)
 	{
-		Line* pTarget = dynamic_cast<Line*>(shape);
-		if(pContact)return CheckLineBoxHit(*pTarget, this->rect, pContact);
-		return CheckLineBoxHit(*pTarget, this->rect);
+		CLine* pTarget = dynamic_cast<CLine*>(shape);
+		if(pContact)return CheckLineBoxHit(pTarget->line, this->rect, pContact);
+		return CheckLineBoxHit(pTarget->line, this->rect);
 	}
 	return false;
 }

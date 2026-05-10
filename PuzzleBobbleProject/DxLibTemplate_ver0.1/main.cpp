@@ -37,7 +37,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		{0, 0, 0, 0, 0, 0, 0, 0}
 	};
 
-	Stage stage(buffer);
+	auto stage = std::make_shared<Stage>(buffer);
+	TaskManager::getInstance()->addObject(stage);
 
 
 	while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0)
@@ -49,7 +50,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		// ↑ システム更新 ↑
 		//---------------------------------------
 
+		CollisionManager::getInstance()->collisionUpdate();
 		TaskManager::getInstance()->taskUpdateAll();
+
+
 
 		//---------------------------------------
 		// 描画

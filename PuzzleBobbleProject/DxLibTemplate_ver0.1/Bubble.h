@@ -49,14 +49,26 @@ public:
 	// 色取得関数
 	int getColor();
 
-	void move(Vector2D vec, float speed);
+	void move(Vector2D _vec, float speed);
 
 	// isCheckedのセッター
 	void setIsChecked(bool check);
 	// canDestroyのセッター
 	void setCanDestroy(bool _canDestroy);
 
+	void setPos(Float2 _pos);
+
 	void setState(int newState);
+
+	int getState();
+
+	void setVector(Vector2D _vec);
+
+	bool hit();
+
+
+
+	Float2 getPos();
 
 	// isCheckedのゲッター
 	bool getIsChecked();
@@ -66,8 +78,11 @@ public:
 	enum STATE
 	{
 		RELOAD,
+		STAY,
 		READY,
+		SHOOT,
 		FIXED,
+		VANISH,
 		NUM
 	};
 

@@ -27,7 +27,7 @@ CollisionObject* CollisionInfo::getTarget(CollisionObject* pBase)
 	{
 		return getColPtr1();
 	}
-	return NULL;
+	return nullptr;
 }
 
 CollisionObject* CollisionInfo::getColPtr1()

@@ -18,45 +18,60 @@ protected:
 
 	std::vector<int> stageExistColorBuffer;
 	
-	class Ballista : public Task
+	// 発射処理用のクラス
+	class Ballista
 	{
 	public:
+		// 発射待機のキュー(現状別にqueueである必要はない)
 		std::queue<std::weak_ptr<Bubble>> shootBubbles;
 
+		// 角度
 		float rotation;
 
+		// 表示用線
+		RenderableLine rLine;
 
+		int state;
 
 	public:
+		// コンストラクタ
 		Ballista();
+		// デストラクタ
+		virtual  ~Ballista();
 
-		~Ballista();
-
+		// 弾を発射状態にする
 		void shoot();
 
+		// 待機&角度変更
 		void wait();
 
-		void reload(std::vector<int> buffer);
+		// 弾の生成と状態の変化
+		void reload(std::vector<int> colorBuffer);
 
-		// 更新
-		void Update() override;
+		void updateProc(std::vector<int> colorBuffer);
 
-		// 破壊判定
-		bool Destroy() override;
+		std::weak_ptr<Bubble> getShooted();
 
-		virtual void activateProc() override;
-		virtual void deactivateProc() override;
-	};
+		enum BALLISTA_STATE
+		{
+			DEFAULT,
+			RELOAD,
+			WAIT,
+			NUM
+		};
+
+	} ballista;
 
 
 	// バブルを破壊するときのカウント
 	// 3以上だった場合canDestroyがtrueのBubbleを一括破壊させる
 	int VanishCount;
 
+	// 描画用の壁と当たり判定
 	CWall cWalls[2];
 	RenderableLine rWalls[2];
 
-
+	// 描画用の天井と当たり判定
 	CCeiling cCeiling;
 	RenderableLine rCeiling;
 
@@ -78,7 +93,10 @@ public:
 	virtual void activateProc() override;
 	virtual void deactivateProc() override;
 
+	// 現在ステージに存在している色の種類をvectorに保存して返す関数
 	std::vector<int> getExistColor();
+
+	void registerShootBubble(std::weak_ptr<Bubble> shoot);
 
 	// バブル破壊判定用の関数
 	// 内部で指定したインデックスのバブルの周囲のマスのバブルを確認し、

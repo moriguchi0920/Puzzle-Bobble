@@ -64,7 +64,7 @@ void CollisionManager::nullAll()
 	}
 	for (int i = 0; i < collisionInfoArray.size(); i++)
 	{
-		collisionInfoArray[i].reset(nullptr);
+		collisionInfoArray[i].reset();
 	}
 }
 
@@ -82,11 +82,11 @@ void CollisionManager::flexibleCollision(CollisionObject* Ob1, CollisionObject* 
 	Ob1->color.set(255, 255, 0);
 	Ob2->color.set(255, 255, 0);
 	// CollisionInfoの動的生成
-	std::unique_ptr<CollisionInfo> upInfo = std::make_unique< CollisionInfo>(Ob1, Ob2);
-	upInfo->setStatus(contact);
-	collisionInfoArray.push_back(std::move(upInfo));
-	Ob1->setInfoIdx(static_cast<int>(collisionInfoArray.size() - 1));
-	Ob2->setInfoIdx(static_cast<int>(collisionInfoArray.size() - 1));
+	std::shared_ptr<CollisionInfo> spInfo = std::make_shared< CollisionInfo>(Ob1, Ob2);
+	spInfo->setStatus(contact);
+	collisionInfoArray.push_back(std::move(spInfo));
+	Ob1->setInfoIdx(static_cast<int>(collisionInfoArray.size()) - 1);
+	Ob2->setInfoIdx(static_cast<int>(collisionInfoArray.size()) - 1);
 
 
 	return ;
@@ -153,7 +153,7 @@ void CollisionManager::collisionUpdate()
 				{
 					continue;
 				}
-				for (size_t l = 0; l < collisionObjectTable[i].size(); l++)
+				for (size_t l = 0; l < collisionObjectTable[k].size(); l++)
 				{
 					CollisionObject* pCollisionTarget = pPObjectArrayTarget[l];
 					// NULLチェック
@@ -213,7 +213,7 @@ void CollisionManager::removeInfoFromCol(CollisionObject* pCol)
 void CollisionManager::updateInfo()
 {
 	// collisionInfoArrayの走査
-	for (int i = 0; i < COLLISION_SAVE_MAX; i++)
+	for (int i = 0; i < collisionInfoArray.size(); i++)
 	{
 		// NULLじゃなかったら
 
@@ -237,16 +237,17 @@ void CollisionManager::updateInfo()
 				continue;
 			}
 			// getColPtr2()が消去済みの場合
-			if (pColInfo->getColPtr2() == NULL || pColInfo->getColPtr2()->getShape() == NULL)
+			if (pColInfo->getColPtr2() == nullptr || pColInfo->getColPtr2()->getShape() == nullptr)
 			{
-				if (pColInfo->getColPtr1() != NULL)
+				if (pColInfo->getColPtr1() != nullptr)
 				{
 					pColInfo->getColPtr1()->color.set(255, 255, 255);
+					// インデックスの登録を解除
 					pColInfo->getColPtr1()->removeInfoIdx(i);
 
 				}
-				// インデックスの登録を解除
-				pColInfo->getColPtr2()->removeInfoIdx(i);
+
+				collisionInfoArray.erase(collisionInfoArray.begin() + i);
 				/*deleteInfoFromIdx(i);*/
 				continue;
 			}
@@ -255,9 +256,7 @@ void CollisionManager::updateInfo()
 			// 継続して当たっていたら
 			if (pColInfo->getColPtr1()->getShape()->checkCollide(pColInfo->getColPtr2()->getShape(), &contact))
 			{
-				// 色変更
-				pColInfo->getColPtr1()->color.set(255, 0, 0);
-				pColInfo->getColPtr2()->color.set(255, 0, 0);
+
 				// 継続判定はtrueのまま
 				// 初回接触はfalseに
 				pColInfo->secondCollision();
@@ -268,9 +267,7 @@ void CollisionManager::updateInfo()
 			// 当たっていない場合
 			else
 			{
-				// 色変更と削除
-				pColInfo->getColPtr1()->color.set(255, 255, 255);
-				pColInfo->getColPtr2()->color.set(255, 255, 255);
+
 				deleteInfoFromIdx(i);
 			}
 		}
@@ -288,7 +285,7 @@ void CollisionManager::deleteInfoFromIdx(int idx)
 // すでに接触情報が保存されている場合に弾く間数
 bool CollisionManager::knownReject(CollisionObject* Ob1, CollisionObject* Ob2)
 {
-	for (int i = 0; i < COLLISION_SAVE_MAX; i++)
+	for (int i = 0; i < collisionInfoArray.size(); i++)
 	{
 		CollisionInfo* pColInfo = collisionInfoArray[i].get();
 		if (pColInfo != NULL)
@@ -317,7 +314,8 @@ void CollisionManager::deleteAllInfo()
 }
 
 // オブジェクトのメンバpColに持たせたインデックスからCollisionInfoを取り出す関数
-CollisionInfo* CollisionManager::getColInfoFromIdx(int idx)
+std::weak_ptr<CollisionInfo> CollisionManager::getColInfoFromIdx(int idx)
 {
-	return collisionInfoArray[idx].get();
+	std::weak_ptr<CollisionInfo> wpColInfo(collisionInfoArray[idx]);
+	return wpColInfo;
 }

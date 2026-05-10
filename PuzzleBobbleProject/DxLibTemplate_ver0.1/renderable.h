@@ -52,7 +52,7 @@ public :
 // •`‰æ‚Å‚«‚éü
 class RenderableLine : public Renderable
 {
-protected:
+public:
 	Line line;
 	DebugColor color;
 public:
@@ -68,7 +68,7 @@ public:
 // •`‰æ‚Å‚«‚élŠp
 class RenderableRect : public Renderable
 {
-protected:
+public:
 	Rect rect;
 	DebugColor color;
 public:
@@ -84,7 +84,7 @@ public:
 // •`‰æ‚Å‚«‚é‰~
 class RenderableCircle : public Renderable
 {
-protected:
+public:
 	Circle circle;
 	DebugColor color;
 public:

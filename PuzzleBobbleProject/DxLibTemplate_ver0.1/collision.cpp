@@ -4,10 +4,6 @@
 CollisionObject::CollisionObject()
 {
 	damage = 1;
-	for (int i = 0; i < INFO_INDEX_MAX; i++)
-	{
-		colInfoIdx[i] = INFO_INDEX_DEFAULT;
-	}
 	isCollide = true;
 }
 // デストラクタ
@@ -19,30 +15,20 @@ CollisionObject::~CollisionObject()
 
 void CollisionObject::setInfoIdx(int idx)
 {
-	for (int i = 0; i < INFO_INDEX_MAX; i++)
-	{
-		if (colInfoIdx[i] == INFO_INDEX_DEFAULT)
-		{
-			colInfoIdx[i] = idx;
-			break;
-		}
-	}
+	colInfoIdx.push_back(idx);
 }
 
 void CollisionObject::removeInfoIdx(int idx)
 {
-	for (int i = 0; i < INFO_INDEX_MAX; i++)
-	{
-		if (colInfoIdx[i] == idx)
-		{
-			colInfoIdx[i] = INFO_INDEX_DEFAULT;
-
-		}
-	}
+	auto it = std::find(colInfoIdx.begin(), colInfoIdx.end(), idx);
+	if (it == colInfoIdx.end()) return;
+	colInfoIdx.erase(it);
 }
-int CollisionObject::getInfoIdx(int i)
+std::vector<int> CollisionObject::getInfoIdx()
 {
-	return colInfoIdx[i];
+
+
+	return colInfoIdx;
 }
 void CollisionObject::setShape(CollisionShape* _pShape)
 {

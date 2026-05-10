@@ -12,7 +12,7 @@ protected:
 	std::unique_ptr<CollisionShape> pShape;
 
 	// CollisionInfo検索用の配列インデックス
-	int colInfoIdx[INFO_INDEX_MAX];
+	std::vector<int> colInfoIdx;
 	// 当たった時のダメージ
 	int damage;
 	// 当たり判定をとるかどうか(無敵などの処理用)
@@ -34,7 +34,7 @@ protected:
 		virtual bool isCollideTarget(CollisionMark mark) = 0;
 		void setInfoIdx(int idx);
 		void removeInfoIdx(int idx);
-		int getInfoIdx(int i);
+		std::vector<int> getInfoIdx();
 		CollisionShape* getShape();
 		void setShape(CollisionShape* _pShape);
 		bool getIsCollide();
