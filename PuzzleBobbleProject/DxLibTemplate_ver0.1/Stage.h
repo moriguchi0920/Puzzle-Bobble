@@ -65,7 +65,7 @@ protected:
 
 	// バブルを破壊するときのカウント
 	// 3以上だった場合canDestroyがtrueのBubbleを一括破壊させる
-	int VanishCount;
+	int BanishCount;
 
 	// 描画用の壁と当たり判定
 	CWall cWalls[2];
@@ -103,8 +103,15 @@ public:
 	// 同じ色のバブルだった場合再帰してほかのバブルを見に行く
 	bool CheckBubbleMatch(int colIdx , int rowIdx);
 
+	bool CheckBubbleFall(int colIdx, int rowIdx);
+
+
+	void resetBubbleCheck();
+
 	// CheckBubbleMatchのあと、isCheckedがtrueのBubbleを破壊可能状態にする
-	void Vanish();
+	void Banish();
+
+	void Fall();
 
 
 };

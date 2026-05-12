@@ -23,6 +23,8 @@ private:
 
 	int lastId;
 
+	int infoId;
+
 public:
 	// シングルトン
 	static CollisionManager* getInstance();
@@ -41,23 +43,24 @@ public:
 	// 当たり判定の更新関数
 	void collisionUpdate();
 
-	void removeInfoFromCol(CollisionObject* pCol);
+	void deleteInfoFromCol(CollisionObject* pCol);
 	// 当たり判定情報の更新関数
 	void updateInfo();
 
 	// インデックスから当たり判定情報を検索する関数
-	std::weak_ptr<CollisionInfo> getColInfoFromIdx(int idx);
+	std::weak_ptr<CollisionInfo> getColInfoFromId(int id);
 
 	// すでに情報として保存されている当たり判定を弾く関数
 	bool knownReject(CollisionObject* Ob1, CollisionObject* Ob2);
 
 
-	// インデックスから当たり判定情報を削除
-	void deleteInfoFromIdx(int idx);
+	// IDから当たり判定情報を削除
+	void deleteInfoFromId(int id);
 
 	// 当たり判定情報すべてを削除する関数
 	void deleteAllInfo();
 
+	int generateId();
 
-	
+	int generateInfoId();
 };

@@ -15,6 +15,8 @@ CollisionManager::CollisionManager()
 		}
 	}
 	lastId = COLLISION_GENERATE_START_ID;
+
+	infoId = 0;
 }
 // デストラクタ
 CollisionManager::~CollisionManager()
@@ -46,13 +48,15 @@ void CollisionManager::removeObject(CollisionObject* _pObject)
 		CollisionObject* c = collisionObjectTable[mark][i];
 		if(c == _pObject)
 		{
-			collisionObjectTable[mark].erase(collisionObjectTable[mark].begin() + i);
-			removeInfoFromCol(_pObject);
-			
+			deleteInfoFromCol(_pObject);
+
 			break;
 		}
 
 	}
+
+	collisionObjectTable[mark].erase(std::remove_if(collisionObjectTable[mark].begin(), collisionObjectTable[mark].end(), [_pObject](CollisionObject* ptr) {return ptr == _pObject; }), collisionObjectTable[mark].end());
+
 }
 
 // CollisionOBjectの登録解除、CllisionInfoの破壊
@@ -82,11 +86,13 @@ void CollisionManager::flexibleCollision(CollisionObject* Ob1, CollisionObject* 
 	Ob1->color.set(255, 255, 0);
 	Ob2->color.set(255, 255, 0);
 	// CollisionInfoの動的生成
-	std::shared_ptr<CollisionInfo> spInfo = std::make_shared< CollisionInfo>(Ob1, Ob2);
+	int id = generateInfoId();
+
+	std::shared_ptr<CollisionInfo> spInfo = std::make_shared< CollisionInfo>(Ob1, Ob2, id);
 	spInfo->setStatus(contact);
 	collisionInfoArray.push_back(std::move(spInfo));
-	Ob1->setInfoIdx(static_cast<int>(collisionInfoArray.size()) - 1);
-	Ob2->setInfoIdx(static_cast<int>(collisionInfoArray.size()) - 1);
+	Ob1->setInfoId(id);
+	Ob2->setInfoId(id);
 
 
 	return ;
@@ -196,17 +202,24 @@ void CollisionManager::collisionUpdate()
 }
 
 // 
-void CollisionManager::removeInfoFromCol(CollisionObject* pCol)
+void CollisionManager::deleteInfoFromCol(CollisionObject* pCol)
 {
-	for (int i = 0; i < COLLISION_SAVE_MAX; i++)
+	for (int i = 0; i < collisionInfoArray.size(); i++)
 	{
-		CollisionInfo* pColInfo = collisionInfoArray[i].get();
-		if (pColInfo != nullptr)
+		CollisionInfo* info = collisionInfoArray[i].get();
+		if (info->getColPtr1() == pCol)
 		{
-			pColInfo->removeCol(pCol);
+			info->getColPtr2()->removeInfoId(info->getId());
+
 		}
+		else if (info->getColPtr2() == pCol)
+		{
+			info->getColPtr1()->removeInfoId(info->getId());
+		}
+
 	}
 
+	collisionInfoArray.erase(std::remove_if(collisionInfoArray.begin(), collisionInfoArray.end(), [pCol](std::shared_ptr<CollisionInfo>& ptr) { return ptr->getColPtr1() == pCol || ptr->getColPtr2() == pCol; }), collisionInfoArray.end());
 }
 
 // 当たり判定情報の更新
@@ -229,7 +242,7 @@ void CollisionManager::updateInfo()
 					// 色変更
 					pColInfo->getColPtr2()->color.set(255, 255, 255);
 					// インデックスの登録を解除
-					pColInfo->getColPtr2()->removeInfoIdx(i);
+					pColInfo->getColPtr2()->removeInfoId(collisionInfoArray[i]->getId());
 				}
 				// 破壊と登録解除
 				collisionInfoArray.erase(collisionInfoArray.begin() + i);
@@ -243,7 +256,7 @@ void CollisionManager::updateInfo()
 				{
 					pColInfo->getColPtr1()->color.set(255, 255, 255);
 					// インデックスの登録を解除
-					pColInfo->getColPtr1()->removeInfoIdx(i);
+					pColInfo->getColPtr1()->removeInfoId(collisionInfoArray[i]->getId());
 
 				}
 
@@ -268,17 +281,31 @@ void CollisionManager::updateInfo()
 			else
 			{
 
-				deleteInfoFromIdx(i);
+				deleteInfoFromId(collisionInfoArray[i]->getId());
 			}
 		}
 	}
 }
 
 // インデックスから検索して削除する関数
-void CollisionManager::deleteInfoFromIdx(int idx)
+void CollisionManager::deleteInfoFromId(int id)
 {
-	collisionInfoArray[idx]->getColPtr1()->removeInfoIdx(idx);
-	collisionInfoArray[idx]->getColPtr2()->removeInfoIdx(idx);
+	int idx = -1;
+	for (int i = 0; i < collisionInfoArray.size(); i++)
+	{
+		if (collisionInfoArray[i]->getId() == id)
+		{
+			idx = i;
+		}
+	}
+
+	if (idx == -1)
+	{
+		return;
+	}
+
+	collisionInfoArray[idx]->getColPtr1()->removeInfoId(id);
+	collisionInfoArray[idx]->getColPtr2()->removeInfoId(id);
 	collisionInfoArray.erase(collisionInfoArray.begin() + idx);
 }
 
@@ -314,8 +341,32 @@ void CollisionManager::deleteAllInfo()
 }
 
 // オブジェクトのメンバpColに持たせたインデックスからCollisionInfoを取り出す関数
-std::weak_ptr<CollisionInfo> CollisionManager::getColInfoFromIdx(int idx)
+std::weak_ptr<CollisionInfo> CollisionManager::getColInfoFromId(int id)
 {
+	int idx = -1;
+	for (int i = 0; i < collisionInfoArray.size(); i++)
+	{
+		if (collisionInfoArray[i]->getId() == id)
+		{
+			idx = i;
+		}
+	}
+
+	if (idx == -1)
+	{
+		return std::weak_ptr<CollisionInfo>();
+	}
+
 	std::weak_ptr<CollisionInfo> wpColInfo(collisionInfoArray[idx]);
 	return wpColInfo;
+}
+
+int CollisionManager::generateId()
+{
+	return lastId++;
+}
+
+int CollisionManager::generateInfoId()
+{
+	return infoId++;
 }

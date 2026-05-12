@@ -25,16 +25,18 @@ protected:
 	Vector2D vec;
 
 	// 当たり判定
-	CBubble cBubble;
+	std::unique_ptr<CBubble> cBubble;
 
 	int state;
 
 	int color;
 
+	float gravity;
+
 
 public:
 	// 引数付きコンストラクタ
-	Bubble(int _col, Float2 _pos, float _radius);
+	Bubble(int _col, Float2 _pos, float _radius, bool isShoot);
 
 	virtual ~Bubble();
 
@@ -66,6 +68,9 @@ public:
 
 	bool hit();
 
+	void setStage();
+
+	void fall();
 
 
 	Float2 getPos();
@@ -83,6 +88,7 @@ public:
 		SHOOT,
 		FIXED,
 		VANISH,
+		FALL,
 		NUM
 	};
 

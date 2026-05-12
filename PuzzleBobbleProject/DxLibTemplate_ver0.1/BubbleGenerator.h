@@ -20,7 +20,7 @@ public:
 	}
 
 	// ¶¬ŠÖ”
-	std::weak_ptr<Bubble> generate(int _col, Float2 _pos, float _radius);
+	std::weak_ptr<Bubble> generate(int _col, Float2 _pos, float _radius, bool isShoot);
 
 
 private:

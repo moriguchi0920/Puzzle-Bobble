@@ -11,7 +11,7 @@ const int COLLISION_SAVE_MAX = 100;
 // 各当たり判定オブジェクトが持つCollisionInfoのインデックスの最大数
 const int INFO_INDEX_MAX = 10;
 // インデックスの初期値
-const int INFO_INDEX_DEFAULT = -1;
+const int INFO_ID_DEFAULT = -1;
 // CollisionInfoの中身の初期値
 const int INFO_VAR_DEFAULT = -1;
 
@@ -38,12 +38,12 @@ const int ROW_ODD = 7;
 const int COL = 13;
 
 const int BUBBLE_RADIUS = 25;
-const float BUBBLE_MOVE_SPEED = 15.0f;
+const float BUBBLE_MOVE_SPEED = 10.0f;
 
 const float BALLISTA_BASE_X = 512.0f;
 const float BALLISTA_BASE_Y = 500.0f;
 
-const int CheckIdxOffsetEven[DIRECTION][2] =
+const int CheckIdxOffsetOdd[DIRECTION][2] =
 {
 	{-1, 0},
 	{-1, 1},
@@ -53,7 +53,7 @@ const int CheckIdxOffsetEven[DIRECTION][2] =
 	{1,  1}
 };
 
-const int CheckIdxOffsetOdd[DIRECTION][2] =
+const int CheckIdxOffsetEven[DIRECTION][2] =
 {
 	{-1, -1},
 	{-1, 0},

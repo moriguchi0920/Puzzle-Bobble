@@ -13,22 +13,24 @@ CollisionObject::~CollisionObject()
 
 }
 
-void CollisionObject::setInfoIdx(int idx)
+void CollisionObject::setInfoId(int id)
 {
-	colInfoIdx.push_back(idx);
+	colInfoId.push_back(id);
 }
 
-void CollisionObject::removeInfoIdx(int idx)
+void CollisionObject::removeInfoId(int id)
 {
-	auto it = std::find(colInfoIdx.begin(), colInfoIdx.end(), idx);
-	if (it == colInfoIdx.end()) return;
-	colInfoIdx.erase(it);
+	if (colInfoId.size() <= 0) return;
+
+	auto it = std::find(colInfoId.begin(), colInfoId.end(), id);
+	if (it == colInfoId.end()) return;
+	colInfoId.erase(it);
 }
-std::vector<int> CollisionObject::getInfoIdx()
+std::vector<int> CollisionObject::getInfoId()
 {
 
 
-	return colInfoIdx;
+	return colInfoId;
 }
 void CollisionObject::setShape(CollisionShape* _pShape)
 {
@@ -106,6 +108,40 @@ bool CBubble::isCollideTarget(CollisionMark mark)
 	bool ret = false;
 
 	if (mark == CollisionMark::BUBBLE || mark == CollisionMark::WALL || mark == CollisionMark::CEILING)
+	{
+		ret = true;
+	}
+
+	return ret;
+
+}
+CollisionObject::CollisionMark CStageBubble::getMark()
+{
+	return CollisionMark::STAGEBUBBLE;
+}
+
+bool CStageBubble::isCollideTarget(CollisionMark mark)
+{
+	bool ret = false;
+
+	if (mark == CollisionMark::SHOOTBUBBLE)
+	{
+		ret = true;
+	}
+
+	return ret;
+
+}
+CollisionObject::CollisionMark CShootBubble::getMark()
+{
+	return CollisionMark::SHOOTBUBBLE;
+}
+
+bool CShootBubble::isCollideTarget(CollisionMark mark)
+{
+	bool ret = false;
+
+	if (mark == CollisionMark::STAGEBUBBLE || mark == CollisionMark::CEILING || mark == CollisionMark::WALL)
 	{
 		ret = true;
 	}

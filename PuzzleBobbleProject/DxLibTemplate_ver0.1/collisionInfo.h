@@ -9,7 +9,7 @@ class CollisionInfo
 {
 public:
 	// コンストラクタ
-	CollisionInfo(CollisionObject* pBase, CollisionObject* pTarget);
+	CollisionInfo(CollisionObject* pBase, CollisionObject* pTarget,int _newId);
 
 	// あたった相手を検索する関数
 	CollisionObject* getTarget(CollisionObject* pBase);
@@ -35,6 +35,9 @@ public:
 
 	Point getLineColVector2();
 
+
+	int getId();
+
 private:
 	// 当たったオブジェクト同士
 	CollisionObject* pCol1;
@@ -52,4 +55,6 @@ private:
 
 	Point lineColVector1;
 	Point lineColVector2;
+
+	int id;
 };

@@ -12,7 +12,7 @@ protected:
 	std::unique_ptr<CollisionShape> pShape;
 
 	// CollisionInfo検索用の配列インデックス
-	std::vector<int> colInfoIdx;
+	std::vector<int> colInfoId;
 	// 当たった時のダメージ
 	int damage;
 	// 当たり判定をとるかどうか(無敵などの処理用)
@@ -25,6 +25,8 @@ protected:
 			WALL,
 			CEILING,
 			BUBBLE,
+			STAGEBUBBLE,
+			SHOOTBUBBLE,
 			COLLISION_MARK_NUM
 		};
 		
@@ -32,9 +34,9 @@ protected:
 		virtual ~CollisionObject();
 		virtual CollisionMark getMark() = 0;
 		virtual bool isCollideTarget(CollisionMark mark) = 0;
-		void setInfoIdx(int idx);
-		void removeInfoIdx(int idx);
-		std::vector<int> getInfoIdx();
+		void setInfoId(int id);
+		void removeInfoId(int id);
+		std::vector<int> getInfoId();
 		CollisionShape* getShape();
 		void setShape(CollisionShape* _pShape);
 		bool getIsCollide();
@@ -70,13 +72,19 @@ public:
 };
 
 
-class CStageBubble : public CollisionObject
+class CStageBubble : public CBubble
 {
 public:
 	virtual CollisionMark getMark() override;
 	virtual bool isCollideTarget(CollisionMark mark) override;
 };
 
+class CShootBubble : public CBubble
+{
+public:
+	virtual CollisionMark getMark() override;
+	virtual bool isCollideTarget(CollisionMark mark) override;
+};
 
 
 

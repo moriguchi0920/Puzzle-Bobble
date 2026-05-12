@@ -1,6 +1,6 @@
 #include "Bubble.h"
 
-Bubble::Bubble(int _col, Float2 _pos, float _radius) : Task(TaskManager::getInstance()->generateId()), rCir(PRIORITY_SPRITE, _pos, _radius), position(_pos)
+Bubble::Bubble(int _col, Float2 _pos, float _radius, bool isShoot) : Task(TaskManager::getInstance()->generateId()), rCir(PRIORITY_SPRITE, _pos, _radius), position(_pos)
 {
 	switch (_col)
 	{
@@ -26,17 +26,31 @@ Bubble::Bubble(int _col, Float2 _pos, float _radius) : Task(TaskManager::getInst
 	color = _col;
 	canDestroy = false;
 	isChecked = false;
+
+	if (isShoot)
+	{
+		cBubble = std::make_unique<CShootBubble>();
+	}
+	else
+	{
+		cBubble = std::make_unique<CStageBubble>();
+	}
+
+
 	CCircle* c = new CCircle;
-	cBubble.setShape(c);
+	cBubble->setShape(c);
+
 
 	ShapeSetParam param(ShapeSetParam::ParamType::PT_CIRCLE);
 	param.param.paramCircle.point = position;
 	param.param.paramCircle.r = BUBBLE_RADIUS;
 
-	cBubble.getShape()->paramUpdate(&param);
+	cBubble->getShape()->paramUpdate(&param);
 
 	RenderableManager::getInstance()->addObject(&rCir);
 	state = STATE::STAY;
+
+	gravity = 0.0f;
 }
 
 Bubble::~Bubble()
@@ -76,6 +90,11 @@ void Bubble::Update()
 
 	case STATE::VANISH:
 		break;
+
+	case STATE::FALL:
+		cBubble->setIsCollide(false);
+		fall();
+		break;
 	}
 
 
@@ -88,13 +107,14 @@ bool Bubble::Destroy()
 
 void Bubble::activateProc()
 {
+	taskState = Task::ACTIVE;
 }
 
 void Bubble::deactivateProc()
 {
-	CollisionManager::getInstance()->removeObject(&cBubble);
+	CollisionManager::getInstance()->removeObject(cBubble.get());
 	RenderableManager::getInstance()->removeObject(&rCir);
-
+	taskState = Task::INACTIVE;
 }
 
 int Bubble::getColor()
@@ -121,19 +141,19 @@ void Bubble::setVector(Vector2D _vec)
 
 bool Bubble::hit()
 {
-	auto colIdx = cBubble.getInfoIdx();
-	for (auto& idx : colIdx)
+	auto colId = cBubble->getInfoId();
+	for (auto& id : colId)
 	{
-		if (idx == INFO_INDEX_DEFAULT) continue;
-		std::weak_ptr<CollisionInfo> info = CollisionManager::getInstance()->getColInfoFromIdx(idx);
+		if (id == INFO_ID_DEFAULT) continue;
+		std::weak_ptr<CollisionInfo> info = CollisionManager::getInstance()->getColInfoFromId(id);
 		if (!info.lock()) continue;
 		if (info.lock()->getEnter())
 		{
 
 			if (state == STATE::SHOOT)
 			{
-				auto targetBubble = info.lock()->getTarget(&cBubble);
-				if (targetBubble->getMark() == CollisionObject::BUBBLE)
+				auto targetBubble = info.lock()->getTarget(cBubble.get());
+				if (targetBubble->getMark() == CollisionObject::STAGEBUBBLE)
 
 				{
 					return true;
@@ -147,6 +167,32 @@ bool Bubble::hit()
 
 
 	return false;
+}
+
+void Bubble::setStage()
+{
+	CollisionManager::getInstance()->removeObject(cBubble.get());
+	cBubble.reset(nullptr);
+	cBubble = std::make_unique<CStageBubble>();
+	CCircle* c = new CCircle;
+	cBubble->setShape(c);
+
+
+	ShapeSetParam param(ShapeSetParam::ParamType::PT_CIRCLE);
+	param.param.paramCircle.point = position;
+	param.param.paramCircle.r = BUBBLE_RADIUS;
+
+	cBubble->getShape()->paramUpdate(&param);
+
+	CollisionManager::getInstance()->addObject(cBubble.get());
+
+}
+
+void Bubble::fall()
+{
+	Vector2D vectorX(0.0f, 5.0f + gravity);
+	gravity += 0.2;
+	move(vectorX, 1.0f);
 }
 
 
@@ -164,19 +210,19 @@ void Bubble::move(Vector2D _vec, float speed)
 	param.param.paramCircle.point = position;
 	param.param.paramCircle.r = BUBBLE_RADIUS;
 
-	cBubble.getShape()->paramUpdate(&param);
+	cBubble->getShape()->paramUpdate(&param);
 	
 
-		auto colIdx = cBubble.getInfoIdx();
-		for (auto& idx : colIdx)
+		auto colId = cBubble->getInfoId();
+		for (auto& id : colId)
 		{
-			if (idx == INFO_INDEX_DEFAULT) continue;
-			std::weak_ptr<CollisionInfo> info = CollisionManager::getInstance()->getColInfoFromIdx(idx);
+			if (id == INFO_ID_DEFAULT) continue;
+			std::weak_ptr<CollisionInfo> info = CollisionManager::getInstance()->getColInfoFromId(id);
 			if (!info.lock()) continue;
 
 			if (info.lock()->getEnter())
 			{
-				if (info.lock()->getTarget(&cBubble)->getMark() == CollisionObject::WALL && state == STATE::SHOOT)
+				if (info.lock()->getTarget(cBubble.get())->getMark() == CollisionObject::WALL && state == STATE::SHOOT)
 				{
 					vec.x *= -1.0f;
 				}
@@ -204,7 +250,7 @@ void Bubble::setPos(Float2 _pos)
 	param.param.paramCircle.point = position;
 	param.param.paramCircle.r = BUBBLE_RADIUS;
 
-	cBubble.getShape()->paramUpdate(&param);
+	cBubble->getShape()->paramUpdate(&param);
 }
 
 bool Bubble::getIsChecked()

@@ -1,13 +1,13 @@
 #include"BubbleGenerator.h"
 
 
-std::weak_ptr<Bubble> BubbleGenerator::generate(int _col, Float2 _pos, float _radius)
+std::weak_ptr<Bubble> BubbleGenerator::generate(int _col, Float2 _pos, float _radius, bool isShoot)
 {
 	// ‚Ü‚¸shared_ptr‚Æ‚µ‚Ä¶¬
-	std::shared_ptr<Bubble> spBubble = std::make_shared<Bubble>(_col, _pos, _radius);
+	std::shared_ptr<Bubble> spBubble = std::make_shared<Bubble>(_col, _pos, _radius, isShoot);
 
 	// CollisionManager‚Ö“o˜^
-	CollisionManager::getInstance()->addObject(&(spBubble->cBubble));
+	CollisionManager::getInstance()->addObject(spBubble->cBubble.get());
 	// RenderableManager‚Ö“o˜^
 	RenderableManager::getInstance()->addObject(&(spBubble->rCir));
 	// TaskManager‚Ö“o˜^

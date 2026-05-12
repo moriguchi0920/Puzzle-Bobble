@@ -2,7 +2,7 @@
 
 
 
-CollisionInfo::CollisionInfo(CollisionObject* pBase, CollisionObject* pTarget)
+CollisionInfo::CollisionInfo(CollisionObject* pBase, CollisionObject* pTarget, int newId)
 {
 	pCol1 = pBase;
 	pCol2 = pTarget;
@@ -14,6 +14,7 @@ CollisionInfo::CollisionInfo(CollisionObject* pBase, CollisionObject* pTarget)
 	rectCollideSide = INFO_VAR_DEFAULT;
 	lineColVector1 = { INFO_VAR_DEFAULT, INFO_VAR_DEFAULT };
 	lineColVector2 = { INFO_VAR_DEFAULT, INFO_VAR_DEFAULT };
+	id = newId;
 }
 
 // CollisionInfoにアクセスする際に当たった相手をもらうための関数
@@ -91,4 +92,11 @@ Point CollisionInfo::getLineColVector1()
 Point CollisionInfo::getLineColVector2()
 {
 	return lineColVector2;
+}
+
+
+
+int CollisionInfo::getId()
+{
+	return id;
 }
