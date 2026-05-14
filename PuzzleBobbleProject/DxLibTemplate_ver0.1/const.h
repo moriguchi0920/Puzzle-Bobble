@@ -21,7 +21,7 @@ const int SPRITE_SIZE = 25;
 const int WINDOW_WIDTH = 1024;
 const int WINDOW_HEIGHT = 576;
 
-const int STAGE_OFFSET_X = 312;
+;
 
 
 const double PI = 3.1415926535;
@@ -40,8 +40,10 @@ const int COL = 13;
 const int BUBBLE_RADIUS = 25;
 const float BUBBLE_MOVE_SPEED = 10.0f;
 
-const float BALLISTA_BASE_X = 512.0f;
-const float BALLISTA_BASE_Y = 500.0f;
+const int STAGE_OFFSET_X = WINDOW_WIDTH / 2.0f - BUBBLE_RADIUS * 8.0f;
+
+const float BALLISTA_BASE_X = WINDOW_WIDTH / 2.0f;
+const float BALLISTA_BASE_Y = WINDOW_HEIGHT - BUBBLE_RADIUS / 2;
 
 const int CheckIdxOffsetOdd[DIRECTION][2] =
 {
@@ -65,7 +67,7 @@ const int CheckIdxOffsetEven[DIRECTION][2] =
 
 
 // 画像マネージャーが管理できる画像情報の総数
-const int IMAGE_INFO_LENGTH = 64;
+const int IMAGE_INFO_LENGTH = 128;
 
 const int SOUND_INFO_LENGTH = 64;
 

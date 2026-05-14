@@ -16,7 +16,10 @@ public:
 	bool isValidAnimationDataNo(int no);
 
 private:
+
+
 	AnimationData animDataArray[ANIMATION_DATA_NUM];
+
 
 };
 

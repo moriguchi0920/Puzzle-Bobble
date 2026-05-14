@@ -65,9 +65,11 @@ Stage::Stage(std::vector<int>* stageInfoBuffer) : Task(TaskManager::getInstance(
 	BanishCount = 0;
 	
 	
-	
+	pushCeilingCol = 0;
 
-	
+	deadLineCol = 12;
+
+	isShake = false;
 }
 
 void Stage::Update()
@@ -77,6 +79,15 @@ void Stage::Update()
 	auto s = ballista.shootBubbles.front().lock();
 	if (!s) return;
 
+	if (4 <= ballista.shootNum)
+	{
+		isShake = true;
+	}
+	else
+	{
+		isShake = false;
+	}
+
 	if (s->getState() == Bubble::STATE::SHOOT
 		&& s->hit())
 	{
@@ -84,6 +95,26 @@ void Stage::Update()
 		registerShootBubble(s);
 		ballista.shootBubbles.pop();
 	}
+
+
+
+
+	if (isShake)
+	{
+		float offset = 5 <= ballista.shootNum ? 0.2f : 0.1f;
+
+		shakeState = (shakeState++) % 4;
+		if (shakeState <= 2)
+		{
+			Shake(offset);
+		}
+		else
+		{
+			SetHome();
+		}
+
+	}
+
 
 
 }
@@ -132,19 +163,41 @@ std::vector<int> Stage::getExistColor()
 
 void Stage::registerShootBubble(std::weak_ptr<Bubble> shoot)
 { 
-	auto s = shoot.lock();
+	// shootは発射されたバブルのweak_ptr
+ 	auto s = shoot.lock();
+	// shootが存在していなかったらreturn
 	if (!s) return;
 
-	float shootPosY = (s->getPos().y);
+	const float cellHeight = BUBBLE_RADIUS * 2.0f;
 
-	int y = std::round(shootPosY / (BUBBLE_RADIUS * 2));
+	// shootの位置から、きれいに並べるためのxとyのインデックスを計算する
+	// インデックス計算のために、天井が押し下げられた分を考慮して位置を補正する
+	// 相対座標として天井の位置を0とするため、y座標から天井が押し下げられた分を引く
+	float shootPosY = (s->getPos().y - (pushCeilingCol * cellHeight) );
 
-	float shootPosX = (s->getPos().x - STAGE_OFFSET_X - (y % 2 == 0 ? BUBBLE_RADIUS : BUBBLE_RADIUS * 2));
 
-	int x = std::round(shootPosX / (BUBBLE_RADIUS * 2));
 
-	if (COL < y) return;
+	// Bubbleの半径の2倍で割って四捨五入することで、きれいに並べるためのyのインデックスを計算
+	int y = std::round(shootPosY / (cellHeight));
 
+
+	// 列のずれは (行 + pushCeilingCol) の偶奇で決まるのでそれを使って X の基準を決める
+	bool screenRowEven = ((y + pushCeilingCol) % 2 == 0);
+	float alignmentOffset = screenRowEven ? BUBBLE_RADIUS : BUBBLE_RADIUS * 2.0f;
+
+	// xのインデックスは、偶数列と奇数列でずれているため、yの偶奇で場合分けして計算する
+	float shootPosX = (s->getPos().x - STAGE_OFFSET_X - alignmentOffset);
+
+	// Bubbleの半径の2倍で割って四捨五入することで、きれいに並べるためのyのインデックスを計算
+	int x = std::round(shootPosX / (cellHeight));
+
+	// インデックスがオーバーしていたら補正
+	y = fix(y, 0, COL - 1);
+
+	// インデックスがゲームオーバーラインを越えていたらreturn
+	if (deadLineCol <= y) return;
+
+	// xの補正(オーバーしないように)
 	if (y % 2 == 0)
 	{
 		x = fix(x, 0, 8 - 1);
@@ -154,86 +207,86 @@ void Stage::registerShootBubble(std::weak_ptr<Bubble> shoot)
 		x = fix(x, 0, 7 - 1);
 	}
 
-	
+	// もし、計算したインデックスにすでにバブルが存在していたら、周囲のマスを見ていちばん近いバブルにくっつける	
  	if (stageBubbles[y][x].lock())
 	{
-
+		// インデックスの補正用変数
 		int setX = 0;
 		int setY = 0;
+		// 周囲のマスを見ていちばん近いバブルにくっつけるための距離の最小値を保存する変数(初期値は適当に大きく)
 		float nearDis = 10000.0f;
+		// 周囲のマスを見回るループ
 		for (int i = 0; i < DIRECTION; i++)
 		{
+			// インデックスの補正値
+			int offsetX;
+			int offsetY;
+			// 周囲インデックスは「発見先の行（y + offsetY）」の偶奇で計算が異なるため、
+			// ここでは各オフセット配列を使い、あとで境界チェックを行う。
 			if (y % 2 == 0)
 			{
-				int offsetX = CheckIdxOffsetEven[i][0];
-				int offsetY = CheckIdxOffsetEven[i][1];
-
-				if (x + offsetX < 0 || ROW_EVEN <= x + offsetX) continue;
-				if (y + offsetY < 0 || COL <= y + offsetY) continue;
-
-				float dis = GetDistance(shootPosX, shootPosY, BUBBLE_RADIUS * (x + offsetX) * 2 + BUBBLE_RADIUS, (y + offsetY) * BUBBLE_RADIUS * 2 + BUBBLE_RADIUS);
-
-
-
-
-				if (dis < nearDis)
-				{
-					nearDis = dis;
-					setX = offsetX;
-					setY = offsetY;
-				}
+				offsetX = CheckIdxOffsetEven[i][0];
+				offsetY = CheckIdxOffsetEven[i][1];
 			}
 			else
 			{
-				int offsetX = CheckIdxOffsetOdd[i][0];
-				int offsetY = CheckIdxOffsetOdd[i][1];
-
-				if (x + offsetX < 0 || ROW_ODD <= x + offsetX) continue;
-				if (y + offsetY < 0 || COL <= y + offsetY) continue;
-
-				float dis = GetDistance(shootPosX, shootPosY, BUBBLE_RADIUS * (x + offsetX) * 2 + BUBBLE_RADIUS * 2, (y + offsetY) * BUBBLE_RADIUS * 2 + BUBBLE_RADIUS);
-
-
-				if (dis < nearDis)
-				{
-					nearDis = dis;
-					setX = offsetX;
-					setY = offsetY;
-				}
-
+				offsetX = CheckIdxOffsetOdd[i][0];
+				offsetY = CheckIdxOffsetOdd[i][1];
 			}
+
+			int nx = x + offsetX;
+			int ny = y + offsetY;
+
+			// まず行の範囲チェック
+			if (ny < 0 || ny >= COL) continue;
+
+			// 次にその行の列数に応じた列範囲チェック
+			int nRowSize = (ny % 2 == 0) ? ROW_EVEN : ROW_ODD;
+			if (nx < 0 || nx >= nRowSize) continue;
+
+			float alignmentOffsetByPushCeiling = ((ny + pushCeilingCol) % 2 == 0) ? BUBBLE_RADIUS : BUBBLE_RADIUS * 2.0f;
+
+			// 周囲のマスの中心座標と、発射されたバブルの中心座標の距離を計算
+			float dis = GetDistance(shootPosX, shootPosY, cellHeight * (nx)+alignmentOffsetByPushCeiling, (ny + pushCeilingCol) * cellHeight - pushCeilingCol * cellHeight);
+
+			// いちばん近いバブルの距離を保存する変数と比較して、より近かったら、インデックスの補正値を保存する変数に保存
+			if (dis < nearDis)
+			{
+				nearDis = dis;
+				setX = offsetX;
+				setY = offsetY;
+			}
+
 			
 		}
+		// 周囲のマスを見回るループを抜けたら、インデックスの補正値をインデックスに足す
 		x += setX;
 		y += setY;
 	}
 
-		if (y % 2 == 0)
-		{
+		bool RowEven = ( y % 2 == 0);
+		float alignmentOffsetByNewRow = RowEven ? BUBBLE_RADIUS : BUBBLE_RADIUS * 2.0f;
 
+		// インデックスから、きれいに並べるための位置を計算して、発射されたバブルの位置を設定
+		float posX = STAGE_OFFSET_X + x * cellHeight + alignmentOffsetByNewRow;
+		float posY = (y + pushCeilingCol) * BUBBLE_RADIUS * 2 + BUBBLE_RADIUS;
+		s->setPos(Float2(posX, posY));
 
-			float posX = STAGE_OFFSET_X + BUBBLE_RADIUS * x * 2 + BUBBLE_RADIUS;
-			float posY = y * BUBBLE_RADIUS * 2 + BUBBLE_RADIUS;
-			s->setPos(Float2(posX, posY));
-		}
-		else
-		{
-
-
-			float posX = STAGE_OFFSET_X + BUBBLE_RADIUS * x * 2 + BUBBLE_RADIUS * 2;
-			float posY = y * BUBBLE_RADIUS * 2 + BUBBLE_RADIUS;
-			s->setPos(Float2(posX, posY));
-
-		}
-	
+		
+		// ステージに登録する前に、発射されたバブルの状態を固定状態にする
 		s->setStage();
 
-
+		// インデックスに発射されたバブルを登録
 		stageBubbles[y][x] = shoot;
+		// BanishCountを0に初期化
 		BanishCount = 0;
+		// バブルが3つ以上つながっているかどうかをチェックする(引数は発射されたバブルのインデックス)
 		CheckBubbleMatch(y, x);
+		// 3つ以上つながっていたら、バブルを破壊可能状態にする
 		Banish();
+		// バブルのチェック状態をリセットする
 		resetBubbleCheck();
+		// 落ちるバブルを見るため、ステージの上一列を走査して、バブル落下判定用の関数を呼び出す
 		for (int i = 0; i < stageBubbles[0].size(); i++)
 		{
 			if (stageBubbles[0][i].lock())
@@ -242,9 +295,19 @@ void Stage::registerShootBubble(std::weak_ptr<Bubble> shoot)
 			}
 			
 		}
-		
+		// 落ちるバブルがあったら落とす
 		Fall();
+		// バブルのチェック状態をリセットする
 		resetBubbleCheck();
+
+		if (ballista.shootNum == 6)
+		{
+			isShake = false;
+			pushCeilingCol++;
+			deadLineCol--;
+			SetHome();
+
+		}
 
 }
 
@@ -512,9 +575,69 @@ void Stage::Fall()
 			if (stageBubbles[i][j].lock()->getIsChecked() == false)
 			{
 				stageBubbles[i][j].lock()->setState(Bubble::STATE::FALL);
+				stageBubbles[i][j].reset();
 			}
 
 		}
+	}
+}
+
+void Stage::Shake(float shakeOffset)
+{
+	float rx = getRandomfloatWithDigits(5, 2);
+	float ry = getRandomfloatWithDigits(5, 2);
+	
+	for (int i = 0; i < COL; i++)
+	{
+		for (int j = 0; j < ROW_EVEN; j++)
+		{
+			if (i % 2 == 1 && 7 <= j)
+			{
+				continue;
+			}
+
+			if (!stageBubbles[i][j].lock()) continue;
+
+			stageBubbles[i][j].lock()->setPos(Float2(stageBubbles[i][j].lock()->getPos().x + rx * shakeOffset, stageBubbles[i][j].lock()->getPos().y + ry * shakeOffset));
+		}
+	}
+
+	for (int i = 0; i < 2; i++)
+	{
+		rWalls[i].set(Float2(rWalls[i].line.begin.x + rx * shakeOffset, rWalls[i].line.begin.y + ry * shakeOffset),
+			Float2(rWalls[i].line.end.x + rx * shakeOffset, rWalls[i].line.end.y + ry * shakeOffset));
+	}
+
+}
+
+void Stage::SetHome()
+{
+	for (int i = 0; i < COL; i++)
+	{
+		for (int j = 0; j < ROW_EVEN; j++)
+		{
+			if (i % 2 == 1 && 7 <= j)
+			{
+				continue;
+			}
+			bool isEven = i % 2 == 0;
+
+			float x = isEven ? STAGE_OFFSET_X + BUBBLE_RADIUS* j *2 + BUBBLE_RADIUS : STAGE_OFFSET_X + BUBBLE_RADIUS * j * 2 + BUBBLE_RADIUS * 2;
+			float y = (i + pushCeilingCol) * BUBBLE_RADIUS * 2 + BUBBLE_RADIUS;
+
+			if (!stageBubbles[i][j].lock()) continue;
+
+			stageBubbles[i][j].lock()->setPos(Float2(x, y));
+		}
+	}
+
+	for (int i = 0; i < 2; i++)
+	{
+
+		Float2 begin(STAGE_OFFSET_X + i * 400, 0);
+		Float2 end(STAGE_OFFSET_X + i * 400, 650);
+		rWalls[i].set(begin, end);
+
 	}
 }
 
@@ -527,6 +650,7 @@ Stage::Ballista::Ballista()
 
 	state = Ballista::DEFAULT;
 	rLine.set(base, top);
+	shootNum = 0;
 }
 
 Stage::Ballista::~Ballista()
@@ -596,6 +720,7 @@ void Stage::Ballista::updateProc(std::vector<int> colorBuffer)
 		wait();
 		if (pushHitKey(KEY_INPUT_SPACE))
 		{
+			shootNum = (shootNum++) % 7;
 			shoot();
 
 			state = BALLISTA_STATE::RELOAD;

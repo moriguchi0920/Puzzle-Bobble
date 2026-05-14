@@ -132,7 +132,7 @@ void AnimationPlayer::render(int baseX, int baseY)
 {
 	// 自分の座標をローカル座標として扱い、引数にもらった基準となる座標を加えて絶対座標に変換する。
 	//DrawGraph(baseX + x, baseY + y, imageArray[imgId], 1);
-
+	DrawRotaGraph(baseX + x, baseY + y, 1.0, angle, imgId, TRUE, reverseX, reverseY);
 
 	//// デバッグ表示
 	//printfDx("pAnimDataSet: %llu\n", pAnimDataSet);

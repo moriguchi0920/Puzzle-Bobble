@@ -73,6 +73,7 @@ public:
 	void fall();
 
 
+
 	Float2 getPos();
 
 	// isChecked‚ÌƒQƒbƒ^[

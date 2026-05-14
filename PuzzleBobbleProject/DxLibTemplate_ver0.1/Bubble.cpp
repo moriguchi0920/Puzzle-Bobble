@@ -190,9 +190,14 @@ void Bubble::setStage()
 
 void Bubble::fall()
 {
-	Vector2D vectorX(0.0f, 5.0f + gravity);
-	gravity += 0.2;
+	Vector2D vectorX(0.0f, 0.0f + gravity);
+	gravity += 0.1f;
 	move(vectorX, 1.0f);
+	if (WINDOW_HEIGHT + BUBBLE_RADIUS <= getPos().y)
+	{
+		deactivate();
+	}
+
 }
 
 

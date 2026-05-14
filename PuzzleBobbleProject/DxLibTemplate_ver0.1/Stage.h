@@ -16,8 +16,21 @@ protected:
 	// 縦は13列
 	std::vector<std::weak_ptr<Bubble>> stageBubbles[13];
 
+	// ステージに存在する色の種類を保存するバッファ
 	std::vector<int> stageExistColorBuffer;
 	
+	//2フレームおきに画面を揺らすためのカウンタ
+	char shakeState;
+
+	// 天井を押し下げる処理の回数(下がった列)のカウンタ
+	int pushCeilingCol;
+
+	// この列までバブルが到達したらゲームオーバーの処理をするためのカウンタ
+	int deadLineCol;
+
+	// 一回のみ押し下げるためのフラグ
+	bool isShake;
+
 	// 発射処理用のクラス
 	class Ballista
 	{
@@ -32,6 +45,10 @@ protected:
 		RenderableLine rLine;
 
 		int state;
+
+		int shootNum;
+
+
 
 	public:
 		// コンストラクタ
@@ -96,6 +113,7 @@ public:
 	// 現在ステージに存在している色の種類をvectorに保存して返す関数
 	std::vector<int> getExistColor();
 
+	// 発射されたバブルを登録する関数
 	void registerShootBubble(std::weak_ptr<Bubble> shoot);
 
 	// バブル破壊判定用の関数
@@ -103,16 +121,25 @@ public:
 	// 同じ色のバブルだった場合再帰してほかのバブルを見に行く
 	bool CheckBubbleMatch(int colIdx , int rowIdx);
 
+	// バブル落下判定用の関数
+	// 内部で指定したインデックスのバブルの周囲のマスのバブルを確認し、
+	// どこかに天井に接しているバブルがあれば落ちない、なければ落ちる
 	bool CheckBubbleFall(int colIdx, int rowIdx);
 
-
+	// CheckBubbleMatchのあと、isCheckedがtrueのBubbleをfalseにする
 	void resetBubbleCheck();
 
 	// CheckBubbleMatchのあと、isCheckedがtrueのBubbleを破壊可能状態にする
 	void Banish();
 
+	// バブル落下処理
 	void Fall();
 
+	// 画面揺らし処理
+	void Shake(float shakeOffset);
+
+	//バブルのポジションを天井の状態を考慮してきれいに並べる
+	void SetHome();
 
 };
 
