@@ -103,9 +103,13 @@ class RenderableImage : public Renderable
 {
 protected:
 	int imageHandle;
+	Float2 pos;
+	float rotation;
+
 public :
 	RenderableImage(float _priority, int _imageHandle);
-	void set();
+	void setPos(Float2 _pos);
+	void setRot(float _rot);
 	virtual void render() override;
 };
 
@@ -114,7 +118,12 @@ class RenderableAnimation : public Renderable
 {
 protected:
 	AnimationPlayer AP;
+	Float2 pos;
+	Float2 base;
 public :
 	RenderableAnimation(float _priority, AnimationDataSet* pAdc);
+	void setBase(Float2 _base);
+	void setPos(Float2 _pos);	
+	AnimationPlayer& getAP();
 	virtual void render() override;
 };

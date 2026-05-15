@@ -2,6 +2,7 @@
 #include "const.h"
 #include "keyManager.h"
 #include"Stage.h"
+#include"AnimationRepository.h"
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -36,8 +37,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	pImageManager->setImageInfo(ImageManager::IMAGE_PLAYER_RIGHT_OVER, "player_right_over.png");
 
 	pImageManager->setImageInfo(ImageManager::IMAGE_BG, "stage_1.png");
+	pImageManager->setImageInfo(ImageManager::IMAGE_GROUND, "scaffold_1.png");
 
 	pImageManager->setImageInfo(ImageManager::IMAGE_NUMBER, "number.png");
+
+	pImageManager->setImageInfo(ImageManager::IMAGE_BANDLE_1, "bandle_1.png");
+	pImageManager->setImageInfo(ImageManager::IMAGE_BANDLE_2, "bandle_2.png");
 
 	pImageManager->setImageInfo(ImageManager::IMAGE_LAUNCH_PAD_1, "launch_pad_1.png");
 	pImageManager->setImageInfo(ImageManager::IMAGE_LAUNCH_PAD_2, "launch_pad_2.png");
@@ -54,7 +59,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	pImageManager->setImageInfo(ImageManager::IMAGE_CRANK, "crank.png");
 	pImageManager->setImageInfo(ImageManager::IMAGE_PIPE, "pipe.png");
-	pImageManager->setImageInfo(ImageManager::IMAGE_ARROW, "arrow.png");
+	pImageManager->setImageInfo(ImageManager::IMAGE_ARROW, "arrow_1.png");
 
 	pImageManager->setImageInfo(ImageManager::IMAGE_BUBBLE_BLUE, "bubble_blue.png");
 	pImageManager->setImageInfo(ImageManager::IMAGE_BUBBLE_BLUE_BURST_1, "bubble_blue_burst_1.png");
@@ -115,7 +120,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	pImageManager->loadImageAll();
 
 
-
+	AnimationRepository* pAnimationRepository = AnimationRepository::getInstance();
+	pAnimationRepository->initAnimationRepository();
 
 	std::vector<int> buffer[13] =
 	{
@@ -164,7 +170,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 		ScreenFlip();
 	}
-
+	ImageManager::getInstance()->clearImageManager();
 
 	DxLib_End();
 

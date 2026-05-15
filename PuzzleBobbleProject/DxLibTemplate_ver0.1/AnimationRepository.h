@@ -63,6 +63,12 @@ public :
 		A_PLAYER_RIGHT_OVER,
 	};
 
+	static enum LaunchPadAnim
+	{
+		A_LAUNCH_PAD,
+		A_LAUNCH_PPAD_REVERSE,	
+	};
+
 	static enum CrankAnim
 	{
 		A_CRANK,
@@ -73,6 +79,7 @@ public :
 	static enum BubbleBlueAnim
 	{
 		A_BUBBLE_BLUE,
+		A_BUBBLE_BLUE_BRIGHT,
 		A_BUBBLE_BLUE_BURST,
 		A_BUBBLE_BLUE_BANISH,
 		A_BUBBLE_BLUE_ENEMY,
@@ -81,6 +88,7 @@ public :
 	static enum BubbleRedAnim
 	{
 		A_BUBBLE_RED,
+		A_BUBBLE_RED_BRIGHT,
 		A_BUBBLE_RED_BURST,
 		A_BUBBLE_RED_BANISH,
 		A_BUBBLE_RED_ENEMY,
@@ -89,6 +97,7 @@ public :
 	static enum BubblePurpleAnim
 	{
 		A_BUBBLE_PURPLE,
+		A_BUBBLE_PURPLE_BRIGHT,
 		A_BUBBLE_PURPLE_BURST,
 		A_BUBBLE_PURPLE_BANISH,
 		A_BUBBLE_PURPLE_ENEMY,
@@ -97,6 +106,7 @@ public :
 	static enum BubbleGrayAnim
 	{
 		A_BUBBLE_GRAY,
+		A_BUBBLE_GRAY_BRIGHT,
 		A_BUBBLE_GRAY_BURST,
 		A_BUBBLE_GRAY_BANISH,
 		A_BUBBLE_GRAY_ENEMY,
@@ -105,6 +115,7 @@ public :
 	static enum BubbleYellowAnim
 	{
 		A_BUBBLE_YELLOW,
+		A_BUBBLE_YELLOW_BRIGHT,
 		A_BUBBLE_YELLOW_BURST,
 		A_BUBBLE_YELLOW_BANISH,
 		A_BUBBLE_YELLOW_ENEMY,
@@ -113,6 +124,7 @@ public :
 	static enum BubbleGreenAnim
 	{
 		A_BUBBLE_GREEN,
+		A_BUBBLE_GREEN_BRIGHT,
 		A_BUBBLE_GREEN_BURST,
 		A_BUBBLE_GREEN_BANISH,
 		A_BUBBLE_GREEN_ENEMY,
@@ -121,6 +133,7 @@ public :
 	static enum BubbleOrangeAnim
 	{
 		A_BUBBLE_ORANGE,
+		A_BUBBLE_ORANGE_BRIGHT,
 		A_BUBBLE_ORANGE_BURST,
 		A_BUBBLE_ORANGE_BANISH,
 		A_BUBBLE_ORANGE_ENEMY,
@@ -129,6 +142,7 @@ public :
 	static enum BubbleWhiteAnim
 	{
 		A_BUBBLE_WHITE,
+		A_BUBBLE_WHITE_BRIGHT,
 		A_BUBBLE_WHITE_BURST,
 		A_BUBBLE_WHITE_BANISH,
 		A_BUBBLE_WHITE_ENEMY,

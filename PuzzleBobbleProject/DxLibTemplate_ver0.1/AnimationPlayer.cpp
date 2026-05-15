@@ -10,6 +10,8 @@ AnimationPlayer::AnimationPlayer(AnimationDataSet* pAdc)
 	wait = 0;
 	animIdx = 0;
 	animNo = 0;
+	x = 0;
+	y = 0;
 
 	cropX = 0;
 	cropY = 0;
@@ -23,6 +25,7 @@ AnimationPlayer::AnimationPlayer(AnimationDataSet* pAdc)
 
 	reverseX = false;
 	reverseY = false;
+	isStop = false;
 }
 
 // 現在再生中のアニメーションの番号を取得
@@ -39,6 +42,11 @@ void AnimationPlayer::changeAnimation(int no)
 	{
 		return;
 	}
+	if (animNo == no)
+	{
+		return;
+	}
+
 	wait = 0;
 	animIdx = 0;
 	animNo = no;
@@ -71,6 +79,7 @@ void AnimationPlayer::update()
 		// アニメーションデータを取得したら、次のデータを見るように
 		// インデックスを一つ進める。
 		animIdx++;
+		isStop = false;
 
 		// 現在のコマンドに対する処理
 		switch (pAde->command)
@@ -85,6 +94,7 @@ void AnimationPlayer::update()
 			animIdx = pAde->data.jumpDataIdx;
 			break;
 		case AC_END:
+			isStop = true;
 			state = AP_STOP;
 			break;
 		case AC_PLAYSOUND:
@@ -132,7 +142,7 @@ void AnimationPlayer::render(int baseX, int baseY)
 {
 	// 自分の座標をローカル座標として扱い、引数にもらった基準となる座標を加えて絶対座標に変換する。
 	//DrawGraph(baseX + x, baseY + y, imageArray[imgId], 1);
-	DrawRotaGraph(baseX + x, baseY + y, 1.0, angle, imgId, TRUE, reverseX, reverseY);
+	DrawRotaGraph(baseX + x, baseY + y, RATE, angle, imgId, TRUE, reverseX, reverseY);
 
 	//// デバッグ表示
 	//printfDx("pAnimDataSet: %llu\n", pAnimDataSet);

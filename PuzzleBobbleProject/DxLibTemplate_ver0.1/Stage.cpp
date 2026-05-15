@@ -1,9 +1,14 @@
 #include "Stage.h"
+#include"AnimationRepository.h"
 
 
 
-
-Stage::Stage(std::vector<int>* stageInfoBuffer) : Task(TaskManager::getInstance()->generateId())
+Stage::Stage(std::vector<int>* stageInfoBuffer) :
+	Task(TaskManager::getInstance()->generateId()),
+	rBackground(0.0f, ImageManager::getInstance()->getImageHandle(ImageManager::IMAGE_BG)),
+	rGround(0.1f, ImageManager::getInstance()->getImageHandle(ImageManager::IMAGE_GROUND)),
+	rBandleFront(0.6f, ImageManager::getInstance()->getImageHandle(ImageManager::IMAGE_BANDLE_2)),
+	rBandleBack(0.2f, ImageManager::getInstance()->getImageHandle(ImageManager::IMAGE_BANDLE_1))
 {
 
 
@@ -30,7 +35,7 @@ Stage::Stage(std::vector<int>* stageInfoBuffer) : Task(TaskManager::getInstance(
 			{
 				bool isEven = i % 2 == 0;
 				float x = isEven ? STAGE_OFFSET_X + BUBBLE_RADIUS * j * 2 + BUBBLE_RADIUS : STAGE_OFFSET_X + BUBBLE_RADIUS * j * 2 + BUBBLE_RADIUS * 2;
-				float y = i * BUBBLE_RADIUS * 2 + BUBBLE_RADIUS;
+				float y = i * BUBBLE_RADIUS * 2 + BUBBLE_RADIUS * 4;
 
 				Float2 position(x, y);
 				stageBubbles[i][j] = BubbleGenerator::getInstance().generate(stageInfoBuffer[i][j], position, BUBBLE_RADIUS, false);
@@ -43,8 +48,8 @@ Stage::Stage(std::vector<int>* stageInfoBuffer) : Task(TaskManager::getInstance(
 
 	for (int i = 0; i < 2; i++)
 	{
-		Float2 begin(STAGE_OFFSET_X + i * 400, 0);
-		Float2 end(STAGE_OFFSET_X + i * 400, 650);
+		Float2 begin(STAGE_OFFSET_X + i * BUBBLE_RADIUS * 2 * 8.0f, 0);
+		Float2 end(STAGE_OFFSET_X + i * BUBBLE_RADIUS * 2 * 8.0f, WINDOW_HEIGHT);
 		rWalls[i].set(begin, end);
 
 		CLine* c = new CLine;
@@ -70,23 +75,33 @@ Stage::Stage(std::vector<int>* stageInfoBuffer) : Task(TaskManager::getInstance(
 	deadLineCol = 12;
 
 	isShake = false;
+
+	rBackground.setPos(Float2(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2));
+	RenderableManager::getInstance()->addObject(&rBackground);
+
+	rGround.setPos(Float2(WINDOW_WIDTH / 2, WINDOW_HEIGHT - 8));
+	RenderableManager::getInstance()->addObject(&rGround);
+
+	rBandleFront.setPos(Float2(WINDOW_WIDTH / 2 - 84 - 15, BALLISTA_BASE_Y + 28 + 1));
+
+	RenderableManager::getInstance()->addObject(&rBandleFront);
+
+	rBandleBack.setPos(Float2(WINDOW_WIDTH / 2 - 84, BALLISTA_BASE_Y + 28));
+	RenderableManager::getInstance()->addObject(&rBandleBack);
+
+
 }
 
 void Stage::Update()
 {
+
 	
+
 	ballista.updateProc(getExistColor());
 	auto s = ballista.shootBubbles.front().lock();
 	if (!s) return;
 
-	if (4 <= ballista.shootNum)
-	{
-		isShake = true;
-	}
-	else
-	{
-		isShake = false;
-	}
+
 
 	if (s->getState() == Bubble::STATE::SHOOT
 		&& s->hit())
@@ -173,7 +188,7 @@ void Stage::registerShootBubble(std::weak_ptr<Bubble> shoot)
 	// shootの位置から、きれいに並べるためのxとyのインデックスを計算する
 	// インデックス計算のために、天井が押し下げられた分を考慮して位置を補正する
 	// 相対座標として天井の位置を0とするため、y座標から天井が押し下げられた分を引く
-	float shootPosY = (s->getPos().y - (pushCeilingCol * cellHeight) );
+	float shootPosY = (s->getPos().y - (pushCeilingCol * cellHeight) - BUBBLE_RADIUS * 4 );
 
 
 
@@ -269,7 +284,7 @@ void Stage::registerShootBubble(std::weak_ptr<Bubble> shoot)
 
 		// インデックスから、きれいに並べるための位置を計算して、発射されたバブルの位置を設定
 		float posX = STAGE_OFFSET_X + x * cellHeight + alignmentOffsetByNewRow;
-		float posY = (y + pushCeilingCol) * BUBBLE_RADIUS * 2 + BUBBLE_RADIUS;
+		float posY = (y + pushCeilingCol) * BUBBLE_RADIUS * 2 + BUBBLE_RADIUS * 4;
 		s->setPos(Float2(posX, posY));
 
 		
@@ -299,6 +314,15 @@ void Stage::registerShootBubble(std::weak_ptr<Bubble> shoot)
 		Fall();
 		// バブルのチェック状態をリセットする
 		resetBubbleCheck();
+
+		if (4 <= ballista.shootNum)
+		{
+			isShake = true;
+		}
+		else
+		{
+			isShake = false;
+		}
 
 		if (ballista.shootNum == 6)
 		{
@@ -623,7 +647,7 @@ void Stage::SetHome()
 			bool isEven = i % 2 == 0;
 
 			float x = isEven ? STAGE_OFFSET_X + BUBBLE_RADIUS* j *2 + BUBBLE_RADIUS : STAGE_OFFSET_X + BUBBLE_RADIUS * j * 2 + BUBBLE_RADIUS * 2;
-			float y = (i + pushCeilingCol) * BUBBLE_RADIUS * 2 + BUBBLE_RADIUS;
+			float y = (i + pushCeilingCol) * BUBBLE_RADIUS * 2 + BUBBLE_RADIUS * 4;
 
 			if (!stageBubbles[i][j].lock()) continue;
 
@@ -634,14 +658,20 @@ void Stage::SetHome()
 	for (int i = 0; i < 2; i++)
 	{
 
-		Float2 begin(STAGE_OFFSET_X + i * 400, 0);
-		Float2 end(STAGE_OFFSET_X + i * 400, 650);
+		Float2 begin(STAGE_OFFSET_X + i * BUBBLE_RADIUS * 2 * 8.0f, 0);
+		Float2 end(STAGE_OFFSET_X + i * BUBBLE_RADIUS * 2 * 8.0f, WINDOW_HEIGHT);
 		rWalls[i].set(begin, end);
 
 	}
 }
 
-Stage::Ballista::Ballista()
+Stage::Ballista::Ballista() : 
+	rBallista(0.3f, AnimationRepository::getInstance()->getAds(AnimationRepository::AOT_LAUNCH_PAD)),
+	rCrank(0.4f, AnimationRepository::getInstance()->getAds(AnimationRepository::AOT_CRANK)),
+	rPipe(0.4f, AnimationRepository::getInstance()->getAds(AnimationRepository::AOT_PIPE)),
+	rPlayerLeft(0.5f, AnimationRepository::getInstance()->getAds(AnimationRepository::AOT_PLAYER_LEFT)),
+	rPlayerRight(0.5f, AnimationRepository::getInstance()->getAds(AnimationRepository::AOT_PLAYER_RIGHT)),
+	rArrow(0.35f, ImageManager::getInstance()->getImageHandle(ImageManager::IMAGE_ARROW))
 {
 	RenderableManager::getInstance()->addObject(&rLine);
 	rotation = -PI / 2;
@@ -651,6 +681,25 @@ Stage::Ballista::Ballista()
 	state = Ballista::DEFAULT;
 	rLine.set(base, top);
 	shootNum = 0;
+
+	rCrank.setBase(Float2(BALLISTA_BASE_X + 48, BALLISTA_BASE_Y + 32));
+	rCrank.getAP().update();
+	RenderableManager::getInstance()->addObject(&rCrank);
+	rBallista.setBase(Float2(BALLISTA_BASE_X - 4, BALLISTA_BASE_Y + 8));
+	rBallista.getAP().update();
+	RenderableManager::getInstance()->addObject(&rBallista);
+	rPipe.getAP().update();
+	rPipe.setBase(Float2(BALLISTA_BASE_X + 6, BALLISTA_BASE_Y + 16));
+	RenderableManager::getInstance()->addObject(&rPipe);
+
+	rPlayerLeft.setBase(Float2(BALLISTA_BASE_X - 32, BALLISTA_BASE_Y + 28));
+	RenderableManager::getInstance()->addObject(&rPlayerLeft);
+	rPlayerRight.setBase(Float2(BALLISTA_BASE_X + 56, BALLISTA_BASE_Y + 28));
+	RenderableManager::getInstance()->addObject(&rPlayerRight);
+
+	rArrow.setPos(Float2(BALLISTA_BASE_X + 4, BALLISTA_BASE_Y + 4));
+	rArrow.setRot(rotation);
+	RenderableManager::getInstance()->addObject(&rArrow);
 }
 
 Stage::Ballista::~Ballista()
@@ -666,22 +715,39 @@ void Stage::Ballista::shoot()
 
 void Stage::Ballista::wait()
 {
-	if (CheckHitKey(KEY_INPUT_LEFT) && -3.14 <= rotation)
+
+
+	if (CheckHitKey(KEY_INPUT_LEFT) && -3.04 <= rotation)
 	{
 		rotation -= 0.05;
+		rBallista.getAP().changeAnimation(AnimationRepository::A_LAUNCH_PAD);
+		rBallista.getAP().update();
+		rPlayerRight.getAP().changeAnimation(AnimationRepository::A_PLAYER_RIGHT_CRANK);
+		rPlayerRight.getAP().update();
 	}
-	if (CheckHitKey(KEY_INPUT_RIGHT)  && rotation <= 3.14)
+	else if (CheckHitKey(KEY_INPUT_RIGHT)  && rotation <= -0.1)
 	{
+		rPlayerRight.getAP().changeAnimation(AnimationRepository::A_PLAYER_RIGHT_CRANK_REVERSE);
+		rPlayerRight.getAP().update();
+		rBallista.getAP().changeAnimation(AnimationRepository::A_LAUNCH_PPAD_REVERSE);
+		rBallista.getAP().update();
 		rotation += 0.05;
 	}
-	rLine.set(Float2(BALLISTA_BASE_X, BALLISTA_BASE_Y), Float2(BALLISTA_BASE_X + 50.0f * cosf(rotation), BALLISTA_BASE_Y + 50.0f * sinf(rotation)));
-	
+	else
+	{
+		rPlayerRight.getAP().changeAnimation(AnimationRepository::A_PLAYER_RIGHT_IDLE);
+		rPlayerRight.getAP().update();
 
+	}
+
+	rLine.set(Float2(BALLISTA_BASE_X, BALLISTA_BASE_Y), Float2(BALLISTA_BASE_X + 50.0f * cosf(rotation), BALLISTA_BASE_Y + 50.0f * sinf(rotation)));
+	rArrow.setRot(rotation + 3.14f / 2);
+	
 }
 
 void Stage::Ballista::reload(std::vector<int> colorBuffer)
 {
-	Float2 pos(200.0, 500.0);
+	Float2 pos(BALLISTA_BASE_X - BUBBLE_RADIUS * 5, BALLISTA_BASE_Y + 36);
 	if (colorBuffer.size() <= 0) return;
 
 	int r = GetRand(colorBuffer.size() - 1);
@@ -693,6 +759,9 @@ void Stage::Ballista::reload(std::vector<int> colorBuffer)
 
 void Stage::Ballista::updateProc(std::vector<int> colorBuffer)
 {
+
+	rPlayerLeft.getAP().update();
+	rPlayerRight.getAP().update();
 	if (shootBubbles.size() == 0)
 	{
 		reload(colorBuffer);
@@ -706,10 +775,15 @@ void Stage::Ballista::updateProc(std::vector<int> colorBuffer)
 	switch (state)
 	{
 	case BALLISTA_STATE::DEFAULT:
+		if (rPlayerLeft.getAP().getIsStop())
+		{
+			rPlayerLeft.getAP().changeAnimation(AnimationRepository::A_PLAYER_LEFT_RELOAD);
+		}
 		if (shootBubbles.front().lock()->getState() == Bubble::STATE::READY)
 		{
 			reload(colorBuffer);
 			state = BALLISTA_STATE::WAIT;
+			rPlayerLeft.getAP().changeAnimation(AnimationRepository::A_PLAYER_LEFT_IDLE);
 		}
 		break;
 	case BALLISTA_STATE::RELOAD:
@@ -720,6 +794,7 @@ void Stage::Ballista::updateProc(std::vector<int> colorBuffer)
 		wait();
 		if (pushHitKey(KEY_INPUT_SPACE))
 		{
+			rPlayerLeft.getAP().changeAnimation(AnimationRepository::A_PLAYER_LEFT_SHOOT);
 			shootNum = (shootNum++) % 7;
 			shoot();
 

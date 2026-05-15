@@ -17,11 +17,15 @@ const int INFO_VAR_DEFAULT = -1;
 
 const int SPRITE_SIZE = 25;
 
+const int WINDOW_WIDTH_ORG = 320;
+const int WINDOW_HEIGHT_ORG = 224;
 
-const int WINDOW_WIDTH = 1024;
-const int WINDOW_HEIGHT = 576;
+const int RATE = 2;
 
-;
+const int WINDOW_WIDTH = WINDOW_WIDTH_ORG * RATE;
+const int WINDOW_HEIGHT = WINDOW_HEIGHT_ORG * RATE;
+
+
 
 
 const double PI = 3.1415926535;
@@ -37,13 +41,13 @@ const int ROW_ODD = 7;
 
 const int COL = 13;
 
-const int BUBBLE_RADIUS = 25;
+const int BUBBLE_RADIUS = 16 / 2 * RATE;
 const float BUBBLE_MOVE_SPEED = 10.0f;
 
 const int STAGE_OFFSET_X = WINDOW_WIDTH / 2.0f - BUBBLE_RADIUS * 8.0f;
 
 const float BALLISTA_BASE_X = WINDOW_WIDTH / 2.0f;
-const float BALLISTA_BASE_Y = WINDOW_HEIGHT - BUBBLE_RADIUS / 2;
+const float BALLISTA_BASE_Y = WINDOW_HEIGHT - BUBBLE_RADIUS * 4;
 
 const int CheckIdxOffsetOdd[DIRECTION][2] =
 {

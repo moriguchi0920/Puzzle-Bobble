@@ -10,7 +10,8 @@ class Bubble : public Task
 protected:
 
 	// •`‰æ—p‰~
-	RenderableCircle rCir;
+	//RenderableCircle rCir;
+	RenderableAnimation rBubble;
 	// ”j‰ó”»’èˆ—”j‰ó”»’èŠÖ”‚ğ’Ê‚Á‚½‚©‚Ç‚¤‚©(—v‚·‚é‚É“¯F‚Å‚Â‚È‚ª‚Á‚Ä‚¢‚ê‚Îtrue‚É‚È‚é)
 	bool isChecked;
 
@@ -102,6 +103,8 @@ public:
 		COL_GREEN,
 		COL_ORANGE,
 		COL_PURPLE,
+		COL_GRAY,
+		COL_WHITE,
 		COL_NUM
 	};
 

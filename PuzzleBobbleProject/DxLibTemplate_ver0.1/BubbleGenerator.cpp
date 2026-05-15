@@ -9,7 +9,7 @@ std::weak_ptr<Bubble> BubbleGenerator::generate(int _col, Float2 _pos, float _ra
 	// CollisionManager‚Ö“o˜^
 	CollisionManager::getInstance()->addObject(spBubble->cBubble.get());
 	// RenderableManager‚Ö“o˜^
-	RenderableManager::getInstance()->addObject(&(spBubble->rCir));
+	RenderableManager::getInstance()->addObject(&(spBubble->rBubble));
 	// TaskManager‚Ö“o˜^
 	TaskManager::getInstance()->addObject(spBubble);
 

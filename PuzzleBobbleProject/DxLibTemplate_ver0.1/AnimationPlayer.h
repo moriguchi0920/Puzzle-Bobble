@@ -1,6 +1,8 @@
 #ifndef __ANIMATION_PLAYER_H__
 #define __ANIMATION_PLAYER_H__
 
+#include"const.h"
+
 // 下のAnimationPlayerクラスではAnimationDataSetの"ポインタ"しか使用していないので、
 // AnimationDataSetクラスの詳細な内容を知らなくてもよい。
 // なぜなら"ポインタ"を使うには"8(or 4)Byte"用意すればよいと判断できるからである。
@@ -21,6 +23,7 @@ enum AnimationPlayerState
 };
 
 
+
 class AnimationPlayer
 {
 public:
@@ -29,12 +32,21 @@ public:
 	// 現在再生中のアニメーションの番号を取得
 	int getCurrentAnimationNo();
 
+	inline bool getIsStop()
+	{
+		return isStop;
+	}
+
 	// 再生するアニメーションを変更
 	void changeAnimation(int no);
 
 	// アニメーションの更新
 	void update();
 
+	inline void setAds(AnimationDataSet* pAdc)
+	{
+		pAnimDataSet = pAdc;
+	}
 
 	// アニメーションの描画
 	// 絶対座標で表示
@@ -58,6 +70,7 @@ private :
 	float angle_plus;
 	bool reverseX;
 	bool reverseY;
+	bool isStop;
 
 private:
 	AnimationDataSet* pAnimDataSet;

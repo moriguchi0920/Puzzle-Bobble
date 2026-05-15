@@ -48,7 +48,14 @@ protected:
 
 		int shootNum;
 
+		RenderableAnimation rBallista;
+		RenderableAnimation rCrank;
+		RenderableAnimation rPipe;
 
+		RenderableAnimation rPlayerLeft;
+		RenderableAnimation rPlayerRight;
+
+		RenderableImage rArrow;
 
 	public:
 		// コンストラクタ
@@ -92,7 +99,15 @@ protected:
 	CCeiling cCeiling;
 	RenderableLine rCeiling;
 
-	
+	RenderableImage rBackground;
+	RenderableImage rGround;
+	RenderableImage rBandleFront;
+	RenderableImage rBandleBack;
+
+
+
+
+
 
 public:
 	// デフォルトコンストラクタ(いらない)

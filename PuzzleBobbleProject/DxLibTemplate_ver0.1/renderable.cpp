@@ -35,11 +35,22 @@ float Renderable::getPriority()
 RenderableImage::RenderableImage(float _priority, int _imageHandle) : Renderable(_priority)
 {
 	imageHandle = _imageHandle;
+	rotation = 0.0f;
+}
+
+void RenderableImage::setPos(Float2 _pos)
+{
+	pos = _pos;
+}
+
+void RenderableImage::setRot(float _rot)
+{
+	rotation = _rot;
 }
 
 void RenderableImage::render()
 {
-
+	DrawRotaGraph(pos.x, pos.y, RATE, rotation , imageHandle, true);
 }
 
 
@@ -48,9 +59,27 @@ RenderableAnimation::RenderableAnimation(float _priority, AnimationDataSet* pAdc
 
 }
 
+void RenderableAnimation::setBase(Float2 _base)
+{
+	base = _base;
+}
+
+void RenderableAnimation::setPos(Float2 _pos)
+{
+	pos = _pos;
+	AP.x = (int)pos.x;	
+	AP.y = (int)pos.y;
+}
+
+AnimationPlayer& RenderableAnimation::getAP()
+{
+	return AP;
+}
+
+
 void RenderableAnimation::render()
 {
-
+	AP.render(base.x, base.y);
 }
 
 RenderableRect::RenderableRect()

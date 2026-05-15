@@ -1,26 +1,42 @@
 #include "Bubble.h"
+#include"AnimationRepository.h"
 
-Bubble::Bubble(int _col, Float2 _pos, float _radius, bool isShoot) : Task(TaskManager::getInstance()->generateId()), rCir(PRIORITY_SPRITE, _pos, _radius), position(_pos)
+Bubble::Bubble(int _col, Float2 _pos, float _radius, bool isShoot) : Task(TaskManager::getInstance()->generateId()), rBubble(PRIORITY_SPRITE, AnimationRepository::getInstance()->getAds(AnimationRepository::AOT_BUBBLE_BLUE)), position(_pos)
 {
+
 	switch (_col)
 	{
 	case COLOR::COL_RED:
-		rCir.setColor(255, 0, 0);
+		rBubble.getAP().setAds(AnimationRepository::getInstance()->getAds(AnimationRepository::AOT_BUBBLE_RED));
+		//rCir.setColor(255, 0, 0);
 		break;
 	case COLOR::COL_BLUE:
-		rCir.setColor(0, 0, 255);
+		rBubble.getAP().setAds(AnimationRepository::getInstance()->getAds(AnimationRepository::AOT_BUBBLE_BLUE));
+		//rCir.setColor(0, 0, 255);
 		break;
 	case COLOR::COL_YELLOW:
-		rCir.setColor(255, 255, 0);
+		rBubble.getAP().setAds(AnimationRepository::getInstance()->getAds(AnimationRepository::AOT_BUBBLE_YELLOW));
+		//rCir.setColor(255, 255, 0);
 		break;
 	case COLOR::COL_GREEN:
-		rCir.setColor(0, 255, 0);
+		rBubble.getAP().setAds(AnimationRepository::getInstance()->getAds(AnimationRepository::AOT_BUBBLE_GREEN));
+		//rCir.setColor(0, 255, 0);
 		break;
 	case COLOR::COL_ORANGE:
-		rCir.setColor(255, 128, 0);
+		rBubble.getAP().setAds(AnimationRepository::getInstance()->getAds(AnimationRepository::AOT_BUBBLE_ORANGE));
+		//rCir.setColor(255, 128, 0);
 		break;
 	case COLOR::COL_PURPLE:
-		rCir.setColor(255, 0, 255);
+		rBubble.getAP().setAds(AnimationRepository::getInstance()->getAds(AnimationRepository::AOT_BUBBLE_PURPLE));
+		//rCir.setColor(255, 0, 255);
+		break;
+	case COLOR::COL_GRAY:
+		rBubble.getAP().setAds(AnimationRepository::getInstance()->getAds(AnimationRepository::AOT_BUBBLE_GRAY));
+		//rCir.setColor(128, 128, 128);
+		break;
+	case COLOR::COL_WHITE:
+		rBubble.getAP().setAds(AnimationRepository::getInstance()->getAds(AnimationRepository::AOT_BUBBLE_WHITE));
+		//rCir.setColor(255, 255, 255);
 		break;
 	}
 	color = _col;
@@ -47,7 +63,8 @@ Bubble::Bubble(int _col, Float2 _pos, float _radius, bool isShoot) : Task(TaskMa
 
 	cBubble->getShape()->paramUpdate(&param);
 
-	RenderableManager::getInstance()->addObject(&rCir);
+	rBubble.setBase(position);
+	RenderableManager::getInstance()->addObject(&rBubble);
 	state = STATE::STAY;
 
 	gravity = 0.0f;
@@ -60,17 +77,18 @@ Bubble::~Bubble()
 
 void Bubble::Update()
 {
+	rBubble.getAP().update();
 	switch (state)
 	{
 	case STATE::RELOAD:
 		if (position.x <= BALLISTA_BASE_X)
 		{
-			Vector2D vectorX(5.0f, 0.0f);
+			Vector2D vectorX(5.0f, -1.8f);
 			move(vectorX, 5.0f);
 		}
 		else
 		{
-			Float2 pos(BALLISTA_BASE_X, position.y);
+			Float2 pos(BALLISTA_BASE_X + 4, position.y);
 			setPos(pos);
 			setState(STATE::READY);
 		}
@@ -86,6 +104,7 @@ void Bubble::Update()
 		break;
 
 	case STATE::FIXED:
+
 		break;
 
 	case STATE::VANISH:
@@ -113,7 +132,7 @@ void Bubble::activateProc()
 void Bubble::deactivateProc()
 {
 	CollisionManager::getInstance()->removeObject(cBubble.get());
-	RenderableManager::getInstance()->removeObject(&rCir);
+	RenderableManager::getInstance()->removeObject(&rBubble);
 	taskState = Task::INACTIVE;
 }
 
@@ -209,7 +228,7 @@ Float2 Bubble::getPos()
 void Bubble::move(Vector2D _vec, float speed)
 {
 	position += _vec * speed;
-	rCir.set(position, BUBBLE_RADIUS);
+	rBubble.setBase(position);
 
 	ShapeSetParam param(ShapeSetParam::ParamType::PT_CIRCLE);
 	param.param.paramCircle.point = position;
@@ -249,7 +268,7 @@ void Bubble::setCanDestroy(bool _canDestroy)
 void Bubble::setPos(Float2 _pos)
 {
 	position = _pos;
-	rCir.set(position, BUBBLE_RADIUS);
+	rBubble.setBase(position);
 
 	ShapeSetParam param(ShapeSetParam::ParamType::PT_CIRCLE);
 	param.param.paramCircle.point = position;
