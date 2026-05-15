@@ -98,15 +98,15 @@ void AnimationRepository::initAnimationRepository()
 	pAd->pushSetImage(DerivationGraph(0,0,19,19, imageHandle));
 	pAd->pushSetWait(120);
 	pAd->pushSetImage(DerivationGraph(19 +13,0,19,19, imageHandle));
-	pAd->pushSetWait(8);
+	pAd->pushSetWait(10);
 	pAd->pushSetImage(DerivationGraph(19 +13 +19 +14,0,20,19, imageHandle));
-	pAd->pushSetWait(8);
+	pAd->pushSetWait(10);
 	pAd->pushSetImage(DerivationGraph(19 +13 +19 +14 +20 +12,0,21,19, imageHandle));
-	pAd->pushSetWait(8);
+	pAd->pushSetWait(10);
 	pAd->pushSetImage(DerivationGraph(19 +13 +19 +14 +20 +12 +21 +10,0,22,19, imageHandle));
-	pAd->pushSetWait(8);
+	pAd->pushSetWait(10);
 	pAd->pushSetImage(DerivationGraph(19 +13 +19 +14 +20 +12 +21 +10 +22 +8,0,25,19, imageHandle));
-	pAd->pushSetWait(8);
+	pAd->pushSetWait(60);
 	pAd->pushJump(0);
 
 	pAd = pAds->getAnimationData(A_PLAYER_RIGHT_WIN);

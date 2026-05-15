@@ -24,12 +24,11 @@ private:
 public:
 	enum SOUNDNAME
 	{
-		SOUND_HIT_PLAYER,
-		SOUND_DEFEAT_PLAYER,
-		SOUND_HIT_ENEMY,
-		SOUND_DEFEAT_ENEMY,
-		SOUND_SHOT_PLAYER,
-		SOUND_EXPLODE,
+		PB_PLAY_BGM,
+		SE_ADSORPTION,
+		SE_BURST,
+		SE_FALLBALL,
+		SE_SHOT,
 	};
 
 	static SoundManager* getInstance();

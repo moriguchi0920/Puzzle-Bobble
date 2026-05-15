@@ -3,6 +3,7 @@
 #include "keyManager.h"
 #include"Stage.h"
 #include"AnimationRepository.h"
+#include"soundManager.h"
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -119,6 +120,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	pImageManager->loadImageAll();
 
+	SoundManager* pSoundManager = SoundManager::getInstance();
+	pSoundManager->setSoundInfo(SoundManager::PB_PLAY_BGM, "PB_PLAY_BGM.m4a");
+	pSoundManager->setSoundInfo(SoundManager::SE_ADSORPTION, "SE_ADSORPTION.m4a");
+	pSoundManager->setSoundInfo(SoundManager::SE_BURST, "SE_BURST.m4a");
+	pSoundManager->setSoundInfo(SoundManager::SE_FALLBALL, "SE_FALLBALL.m4a");
+	pSoundManager->setSoundInfo(SoundManager::SE_SHOT, "SE_SHOT.m4a");
+
+	pSoundManager->loadSoundAll();
 
 	AnimationRepository* pAnimationRepository = AnimationRepository::getInstance();
 	pAnimationRepository->initAnimationRepository();
@@ -142,6 +151,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	auto stage = std::make_shared<Stage>(buffer);
 	TaskManager::getInstance()->addObject(stage);
+
+	SoundManager::getInstance()->setSoundVolume(100);
+
+	PlaySoundMem(SoundManager::getInstance()->getSoundHandle(SoundManager::PB_PLAY_BGM), DX_PLAYTYPE_LOOP);
 
 
 	while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0)

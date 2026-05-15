@@ -1,6 +1,6 @@
 #include "Stage.h"
 #include"AnimationRepository.h"
-
+#include"soundManager.h"
 
 
 Stage::Stage(std::vector<int>* stageInfoBuffer) :
@@ -94,7 +94,10 @@ Stage::Stage(std::vector<int>* stageInfoBuffer) :
 
 void Stage::Update()
 {
-
+		if(ballista.shootNum <= 3)
+		{
+				isShake = false;
+		}
 	
 
 	ballista.updateProc(getExistColor());
@@ -107,6 +110,8 @@ void Stage::Update()
 		&& s->hit())
 	{
 		s->setState(Bubble::STATE::FIXED);
+		int handle = SoundManager::getInstance()->getSoundHandle(SoundManager::SE_ADSORPTION);
+		PlaySoundMem(handle, DX_PLAYTYPE_BACK);
 		registerShootBubble(s);
 		ballista.shootBubbles.pop();
 	}
@@ -319,10 +324,7 @@ void Stage::registerShootBubble(std::weak_ptr<Bubble> shoot)
 		{
 			isShake = true;
 		}
-		else
-		{
-			isShake = false;
-		}
+
 
 		if (ballista.shootNum == 6)
 		{
@@ -570,6 +572,9 @@ void Stage::Banish()
 
 				if (stageBubbles[i][j].lock()->getIsChecked() == true)
 				{
+					int handle = SoundManager::getInstance()->getSoundHandle(SoundManager::SE_BURST);
+					PlaySoundMem(handle, DX_PLAYTYPE_BACK);
+
 					stageBubbles[i][j].lock()->deactivate();
 					stageBubbles[i][j].reset();
 				}
@@ -598,6 +603,8 @@ void Stage::Fall()
 
 			if (stageBubbles[i][j].lock()->getIsChecked() == false)
 			{
+				int handle = SoundManager::getInstance()->getSoundHandle(SoundManager::SE_FALLBALL);
+				PlaySoundMem(handle, DX_PLAYTYPE_BACK);
 				stageBubbles[i][j].lock()->setState(Bubble::STATE::FALL);
 				stageBubbles[i][j].reset();
 			}
@@ -796,6 +803,8 @@ void Stage::Ballista::updateProc(std::vector<int> colorBuffer)
 		{
 			rPlayerLeft.getAP().changeAnimation(AnimationRepository::A_PLAYER_LEFT_SHOOT);
 			shootNum = (shootNum++) % 7;
+			int handle = SoundManager::getInstance()->getSoundHandle(SoundManager::SE_SHOT);
+			PlaySoundMem(handle, DX_PLAYTYPE_BACK);
 			shoot();
 
 			state = BALLISTA_STATE::RELOAD;
